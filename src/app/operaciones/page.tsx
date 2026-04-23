@@ -1,3 +1,10 @@
-export default function Operaciones() {
-  return <h1>Módulo Operaciones</h1>
+import React from 'react';
+import Seccion1 from './Seccion1'; 
+
+export default function PaginaOperaciones() {
+  return (
+    <main>
+      <Seccion1 />
+    </main>
+  );
 }
