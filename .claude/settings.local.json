@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf '/c/Users/ADMIN/Documents/Universidad/Integrador 2/v2/erp-sunat-frontend/src/app/gerenciaGeneral')",
+      "Bash(cp -r '/c/Users/ADMIN/Documents/Universidad/Integrador 2/Prueba/oraid/src/app/dashboard' '/c/Users/ADMIN/Documents/Universidad/Integrador 2/v2/erp-sunat-frontend/src/app/gerenciaGeneral')",
+      "Bash(cp -r '/c/Users/ADMIN/Documents/Universidad/Integrador 2/Prueba/oraid/src/components/dashboard' '/c/Users/ADMIN/Documents/Universidad/Integrador 2/v2/erp-sunat-frontend/src/components/dashboard')",
+      "Bash(cp '/c/Users/ADMIN/Documents/Universidad/Integrador 2/Prueba/oraid/src/lib/exporters.ts' '/c/Users/ADMIN/Documents/Universidad/Integrador 2/v2/erp-sunat-frontend/src/lib/exporters.ts')"
+    ]
+  }
+}
