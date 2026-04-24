@@ -16,21 +16,39 @@ export default function Seccion3({ alAnterior, alPago }: { alAnterior: () => voi
     }));
   };
 
+  const manejarSalir = () => {
+  window.location.href = "/login";
+};
+
   const textGray = "text-[#6c757d]";
 
   return (
     <div className="min-h-screen bg-[#e9ecef] font-sans text-left">
       {/* CABECERA SUNAT */}
-      <header className="bg-white p-4 border-b">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <img src="/logo-sunat.png" alt="Logo SUNAT" className="h-12 w-auto" />
-          <nav className="hidden md:flex space-x-8 text-[14px] font-medium text-gray-500">
-            <span className="hover:text-[#0071BC] cursor-pointer">Marketing y Ventas</span>
-            <span className="hover:text-[#0071BC] cursor-pointer">Logística y Almacén</span>
-            <span className="text-[#0071BC] border-b-2 border-[#0071BC] pb-1">Producción y Operaciones</span>
-          </nav>
-        </div>
-      </header>
+<header className="bg-white p-4 border-b">
+  <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    
+    <img src="/logo-sunat.png" alt="Logo SUNAT" className="h-12 w-auto" />
+    
+    {/* Menú de Navegación */}
+    <nav className="hidden md:flex space-x-8 text-[14px] font-medium text-gray-500 items-center">
+      <span className="hover:text-[#0071BC] cursor-pointer">Marketing y Ventas</span>
+      <span className="hover:text-[#0071BC] cursor-pointer">Logística y Almacén</span>
+      <span className="text-[#0071BC] border-b-2 border-[#0071BC] pb-1">Producción y Operaciones</span>
+      
+      {/* Botón Salir */}
+      <button 
+        onClick={manejarSalir}
+        className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all border border-transparent hover:border-red-100 group"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 transition-transform group-hover:scale-110">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+        </svg>
+        <span>Salir</span>
+      </button>
+    </nav>
+  </div>
+</header>
 
       <div className="bg-[#0071BC] h-14 w-full shadow-md flex items-center px-8"></div>
 
