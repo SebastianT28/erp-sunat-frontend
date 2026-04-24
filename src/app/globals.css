@@ -8,6 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
@@ -63,6 +64,7 @@ input[data-kind="num"],
   [data-ledger-row] {
     animation: none;
   }
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -75,5 +77,6 @@ input[data-kind="num"],
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito-sans), 'Nunito Sans', Arial, Helvetica, sans-serif;
+  font-weight: 800;
 }
