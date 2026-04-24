@@ -27,6 +27,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      
 
       {/* Barra superior */}
       <div className="h-14 bg-[#0063AE]"></div>
@@ -115,6 +116,9 @@ export default function Login() {
                 Guardar mis datos para la próxima sesión
               </span>
 
+              <input type="checkbox" className="accent-[#FF4081]" />
+
+
               <button
                 type="button"
                 onClick={() => setGuardarDatos(!guardarDatos)}
@@ -135,7 +139,18 @@ export default function Login() {
               </p>
             </div>
 
+
             {/* Botones */}
+
+            <div className="flex justify-between mt-6">
+              <button
+                onClick={handleRegister}
+                className="bg-[#0063AE] text-white px-4 py-2 shadow"
+              >
+
+                Crear Cuenta
+              </button>
+
             <div className="flex justify-between mt-8 items-end">
 
               <div className="flex flex-col items-center">
@@ -149,6 +164,7 @@ export default function Login() {
                   Crear Cuenta
                 </button>
               </div>
+
 
               <button
                 onClick={handleLogin}
