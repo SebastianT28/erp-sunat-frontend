@@ -133,7 +133,7 @@ export default function Dashboard() {
                     )}
                   </div>
                   <button
-                    onClick={() => router.push("/marketing")}
+                    onClick={() => router.push("/operaciones")}
                     className="bg-[#0063AE] text-white px-5 py-1.5 font-extrabold text-sm shadow hover:bg-[#004d8a] transition-colors"
                   >
                     Continuar

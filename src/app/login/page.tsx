@@ -14,6 +14,7 @@ export default function Login() {
   const [guardarDatos, setGuardarDatos] = useState(false)
 
   const handleLogin = () => {
+    // IMPORTANTE: Verifica que estas carpetas existan en src/app/
     if (tipo === "admin") {
       router.push("/gerenciaGeneral")
     } else {
@@ -22,13 +23,12 @@ export default function Login() {
   }
 
   const handleRegister = () => {
+    // Si tu modulo se llama logistica, cambia "/marketing" por "/logistica"
     router.push("/marketing")
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      
-
       {/* Barra superior */}
       <div className="h-14 bg-[#0063AE]"></div>
 
@@ -44,45 +44,45 @@ export default function Login() {
         />
       </div>
 
-      {/* Contenedor */}
+      {/* Contenedor Central */}
       <div className="flex flex-1 items-center justify-center">
-
         <div className="bg-white border border-gray-300 w-[520px] shadow-md mx-auto">
-
-          {/* Header */}
+          
+          {/* Header azul */}
           <div className="bg-[#0063AE] text-white text-center py-4 font-extrabold text-lg">
             SUNAT Operaciones en Línea
           </div>
 
           <div className="p-8">
-
-            {/* Tabs */}
+            {/* Tabs Usuario/Admin */}
             <div className="flex justify-center gap-4 mb-8">
               <button
+                type="button"
                 onClick={() => setTipo("usuario")}
-                className={`px-5 py-2.5 font-extrabold ${tipo === "usuario"
+                className={`px-5 py-2.5 font-extrabold ${
+                  tipo === "usuario"
                     ? "bg-[#0063AE] text-white shadow"
                     : "bg-gray-300 text-gray-600"
-                  }`}
+                }`}
               >
                 USUARIO
               </button>
 
               <button
+                type="button"
                 onClick={() => setTipo("admin")}
-                className={`px-5 py-2.5 font-extrabold ${tipo === "admin"
+                className={`px-5 py-2.5 font-extrabold ${
+                  tipo === "admin"
                     ? "bg-[#0063AE] text-white shadow"
                     : "bg-gray-300 text-gray-600"
-                  }`}
+                }`}
               >
                 ADMINISTRADOR
               </button>
             </div>
 
-            {/* Inputs */}
+            {/* Formulario */}
             <div className="flex flex-col gap-5">
-
-              {/* RUC solo se muestra para usuario */}
               {tipo === "usuario" && (
                 <input
                   type="text"
@@ -110,54 +110,42 @@ export default function Login() {
               />
             </div>
 
-            {/* Toggle switch */}
+            {/* Checkbox Guardar Datos */}
             <div className="flex items-center justify-between mt-5">
               <span className="text-[#FF4081] text-sm font-extrabold">
                 Guardar mis datos para la próxima sesión
               </span>
 
-              <input type="checkbox" className="accent-[#FF4081]" />
-
-
               <button
                 type="button"
                 onClick={() => setGuardarDatos(!guardarDatos)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${guardarDatos ? "bg-[#FF4081]" : "bg-gray-300"
-                  }`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
+                  guardarDatos ? "bg-[#FF4081]" : "bg-gray-300"
+                }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out shadow ${guardarDatos ? "translate-x-6" : "translate-x-1"
-                    }`}
+                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out shadow ${
+                    guardarDatos ? "translate-x-6" : "translate-x-1"
+                  }`}
                 />
               </button>
             </div>
 
-            {/* Textos en negro */}
+            {/* Olvido contraseña */}
             <div className="text-center mt-5 text-sm text-black">
-              <p className="font-extrabold">
+              <p className="font-extrabold cursor-pointer hover:underline">
                 ¿Olvidaste tu usuario o contraseña?
               </p>
             </div>
 
-
-            {/* Botones */}
-
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={handleRegister}
-                className="bg-[#0063AE] text-white px-4 py-2 shadow"
-              >
-
-                Crear Cuenta
-              </button>
-
+            {/* Botones de acción */}
             <div className="flex justify-between mt-8 items-end">
-
               <div className="flex flex-col items-center">
                 <p className="text-sm text-black mb-2 font-extrabold">
-                  ¿No estas registrado?
+                  ¿No estás registrado?
                 </p>
                 <button
+                  type="button"
                   onClick={handleRegister}
                   className="bg-[#0063AE] text-white px-5 py-2.5 shadow font-extrabold"
                 >
@@ -165,19 +153,16 @@ export default function Login() {
                 </button>
               </div>
 
-
               <button
+                type="button"
                 onClick={handleLogin}
                 className="bg-[#0063AE] text-white px-5 py-2.5 shadow font-extrabold"
               >
                 Iniciar Sesión
               </button>
-
             </div>
-
           </div>
         </div>
-
       </div>
     </div>
   )
