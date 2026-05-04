@@ -11,6 +11,7 @@ export default function PaginaOperaciones() {
 
   // ESTADO GLOBAL
   const [formData, setFormData] = useState({
+    idBaseDatos: null,
     periodoTributario: '',
     tipoDeclaracion: '',
     condicionIgv: 'Cuenta propia',
@@ -61,12 +62,14 @@ export default function PaginaOperaciones() {
         <Seccion3 
           alAnterior={irAAnterior} 
           alPago={() => setPaso(4)} 
-          datos={formData} 
+          datos={formData}
+          actualizarDatos={actualizarDatos}
         />
       )}
       {paso === 4 && (
         <SeccionPago 
           alFinalizar={finalizarTodo} 
+          datos={formData}
         />
       )}
     </main>

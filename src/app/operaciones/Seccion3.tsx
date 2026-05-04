@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from "next/link";
 
-export default function Seccion3({ alAnterior, alPago, datos }: { alAnterior: () => void, alPago: () => void, datos: any }) {
+export default function Seccion3({ alAnterior, alPago, datos, actualizarDatos }: { alAnterior: () => void, alPago: () => void, datos: any, actualizarDatos: (d: any) => void }) {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
     saldos: true,
     intereses: false,
@@ -84,7 +84,11 @@ export default function Seccion3({ alAnterior, alPago, datos }: { alAnterior: ()
       });
 
       if (response.ok) {
+        const responseData = await response.json();
         alert("¡Datos guardados con éxito en la base de datos! (Status: " + response.status + ")");
+        if (responseData && responseData.id) {
+          actualizarDatos({ idBaseDatos: responseData.id });
+        }
         alPago();
       } else {
         const errorText = await response.text();

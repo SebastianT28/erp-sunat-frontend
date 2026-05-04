@@ -56,6 +56,9 @@ public class FormularioGeneral {
     @OneToMany(mappedBy = "formulario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Casilla> casillas = new ArrayList<>();
 
+    @OneToOne(mappedBy = "formulario", cascade = CascadeType.ALL)
+    private PagoNPS pago;
+
     // Helper method for bidirectional relationship
     public void addCasilla(Casilla casilla) {
         casillas.add(casilla);
@@ -65,6 +68,14 @@ public class FormularioGeneral {
     public void removeCasilla(Casilla casilla) {
         casillas.remove(casilla);
         casilla.setFormulario(null);
+    }
+
+    public PagoNPS getPago() {
+        return pago;
+    }
+
+    public void setPago(PagoNPS pago) {
+        this.pago = pago;
     }
 
     // Getters and Setters
