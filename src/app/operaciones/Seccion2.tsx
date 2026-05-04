@@ -2,61 +2,157 @@
 
 import React, { useState } from 'react';
 import Link from "next/link";
+import * as XLSX from 'xlsx';
 
-export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () => void, alSiguiente: () => void }) {
+export default function Seccion2({ alAnterior, alSiguiente, datos, actualizarDatos }: { alAnterior: () => void, alSiguiente: () => void, datos: any, actualizarDatos: (d: any) => void }) {
   const [tab, setTab] = useState('IGV');
-  const [suspension, setSuspension] = useState(false);
-  const [pdt625, setPdt625] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // ESTADOS INDEPENDIENTES
   const [datosIGV, setDatosIGV] = useState({
     c100: '', c101: '', c107: '', c108: '', c131: '', c178: ''
   });
 
   const [datosRenta, setDatosRenta] = useState({
-    c380: '', c315: '', c312: '', c301: '', numRes: '', fechaMod: '', coefSunat: ''
+    c380: '', c315: '', c312: '', c301: ''
+  });
+
+  const [validez, setValidez] = useState({
+    c101: true,
+    c108: true
   });
 
   const manejarSalir = () => {
-  window.location.href = "/login";
-};
+    window.location.href = "/login";
+  };
+
+  const procesarExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target?.result;
+      const wb = XLSX.read(bstr, { type: 'binary' });
+      const wsname = wb.SheetNames[0];
+      const ws = wb.Sheets[wsname];
+      const data = XLSX.utils.sheet_to_json(ws);
+      
+      const nuevosIgv = { ...datosIGV };
+      const nuevosRenta = { ...datosRenta };
+
+      data.forEach((row: any) => {
+        const casillaStr = String(row.Casilla || row.casilla || '').trim();
+        const valor = String(row.Valor || row.valor || '').trim();
+
+        if (casillaStr === '100') nuevosIgv.c100 = valor;
+        if (casillaStr === '101') nuevosIgv.c101 = valor;
+        if (casillaStr === '107') nuevosIgv.c107 = valor;
+        if (casillaStr === '108') nuevosIgv.c108 = valor;
+        if (casillaStr === '131') nuevosIgv.c131 = valor;
+        if (casillaStr === '178') nuevosIgv.c178 = valor;
+        
+        if (casillaStr === '380') nuevosRenta.c380 = valor;
+        if (casillaStr === '315') nuevosRenta.c315 = valor;
+        if (casillaStr === '312') nuevosRenta.c312 = valor;
+        if (casillaStr === '301') nuevosRenta.c301 = valor;
+      });
+
+      // Cálculo Automático y Validación (Semáforo)
+      const base100 = parseFloat(nuevosIgv.c100) || 0;
+      const base107 = parseFloat(nuevosIgv.c107) || 0;
+      const calc101 = Math.round(base100 * 0.18 * 100) / 100;
+      const calc108 = Math.round(base107 * 0.18 * 100) / 100;
+
+      const excel101 = parseFloat(nuevosIgv.c101) || 0;
+      const excel108 = parseFloat(nuevosIgv.c108) || 0;
+
+      // Calcular totales automáticamente
+      nuevosIgv.c131 = nuevosIgv.c101;
+      nuevosIgv.c178 = nuevosIgv.c108;
+
+      setValidez({
+        c101: Math.abs(calc101 - excel101) < 0.1, // Tolerancia por redondeo
+        c108: Math.abs(calc108 - excel108) < 0.1
+      });
+
+      setDatosIGV(nuevosIgv);
+      setDatosRenta(nuevosRenta);
+
+      // Limpiar input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsBinaryString(file);
+  };
+
+  const isEspecial = datos.regimenTributario === 'Especial';
+  const isMype = datos.regimenTributario === 'MYPE Tributario';
+  const isGeneral = datos.regimenTributario === 'General';
+
+  // Forzar valores según régimen
+  let current315 = datosRenta.c315;
+  let current380 = datosRenta.c380;
+  
+  if (isEspecial) {
+    current315 = '1.5';
+    current380 = '';
+  } else if (isMype) {
+    current315 = '1.0';
+  } else if (isGeneral) {
+    current315 = '1.5';
+  }
+
+  // Calcular 312 dinámicamente
+  let calc312 = '0.00';
+  if (!datos.suspensionPagos) {
+    const v301 = parseFloat(datosRenta.c301) || 0;
+    const v380 = parseFloat(current380) || 0;
+    const v315 = parseFloat(current315) || 0;
+    const factor = Math.max(v380, v315 / 100);
+    calc312 = (Math.round(v301 * factor * 100) / 100).toFixed(2);
+  }
+
+  const handleSiguiente = () => {
+    const casillasArray = [
+      { numeroCasilla: "100", valor: Number(datosIGV.c100) || 0 },
+      { numeroCasilla: "101", valor: Number(datosIGV.c101) || 0 },
+      { numeroCasilla: "107", valor: Number(datosIGV.c107) || 0 },
+      { numeroCasilla: "108", valor: Number(datosIGV.c108) || 0 },
+      { numeroCasilla: "131", valor: Number(datosIGV.c131) || 0 },
+      { numeroCasilla: "178", valor: Number(datosIGV.c178) || 0 },
+      { numeroCasilla: "380", valor: Number(current380) || 0 },
+      { numeroCasilla: "315", valor: Number(current315) || 0 },
+      { numeroCasilla: "312", valor: Number(calc312) || 0 },
+      { numeroCasilla: "301", valor: Number(datosRenta.c301) || 0 }
+    ];
+    actualizarDatos({ casillas: casillasArray });
+    alSiguiente();
+  };
+
+  const RenderSemaforo = ({ esValido }: { esValido: boolean }) => (
+    <div className="flex items-center justify-center space-x-1">
+      <span className={`h-3 w-3 rounded-full ${esValido ? 'bg-green-500' : 'bg-red-500'}`}></span>
+      <span className={`font-bold text-xs whitespace-nowrap ${esValido ? 'text-green-600' : 'text-red-600'}`}>
+        {esValido ? 'Válido' : 'Diferencia'}
+      </span>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#e9ecef] font-sans">
-      {/* CABECERA SUPERIOR */}
       <header className="bg-white p-4 border-b">
-  <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-    
-    <img src="/logo-sunat.png" alt="Logo SUNAT" className="h-12 w-auto" />
-    
-    {/* Menú de Navegación */}
-    <nav className="hidden md:flex space-x-8 text-[14px] font-medium text-gray-500 items-center">
-  <Link href="/marketing" className="hover:text-[#0071BC] cursor-pointer">
-    Marketing y Ventas
-  </Link>
-  
-  <Link href="/logistica" className="hover:text-[#0071BC] cursor-pointer">
-    Logística y Almacén
-  </Link>
-  
-  <Link href="/operaciones" className="text-[#0071BC] border-b-2 border-[#0071BC] pb-1">
-    Producción y Operaciones
-  </Link>
-  
-  {/* Botón Salir */}
-  <button 
-    onClick={manejarSalir}
-    className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all border border-transparent hover:border-red-100 group"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 transition-transform group-hover:scale-110">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-    </svg>
-    <span>Salir</span>
-  </button>
-</nav>
-  </div>
-</header>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <img src="/logo-sunat.png" alt="Logo SUNAT" className="h-12 w-auto" />
+          <nav className="hidden md:flex space-x-8 text-[14px] font-medium text-gray-500 items-center">
+            <Link href="/marketing" className="hover:text-[#0071BC] cursor-pointer">Marketing y Ventas</Link>
+            <Link href="/logistica" className="hover:text-[#0071BC] cursor-pointer">Logística y Almacén</Link>
+            <Link href="/operaciones" className="text-[#0071BC] border-b-2 border-[#0071BC] pb-1">Producción y Operaciones</Link>
+            <button onClick={manejarSalir} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all border border-transparent hover:border-red-100 group">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 transition-transform group-hover:scale-110"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+              <span>Salir</span>
+            </button>
+          </nav>
+        </div>
+      </header>
 
       <div className="bg-[#0071BC] h-14 w-full shadow-md flex items-center px-8"></div>
 
@@ -66,7 +162,6 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
 
       <div className="max-w-5xl mx-auto mt-6 bg-[#f8f9fa] shadow-2xl rounded-lg overflow-hidden mb-10 text-left">
         
-        {/* STEPPER */}
         <div className="bg-white p-6 border-b flex justify-around items-center text-center">
           {[
             { n: "1", t: "Información general", active: false },
@@ -84,7 +179,6 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
         <div className="p-6 md:p-10">
           <h2 className="text-[#0071BC] text-xl md:text-2xl font-bold mb-8 border-b-2 border-blue-100 pb-2">Sección II: Detalle de declaración</h2>
 
-          {/* GRID SUPERIOR: EXCEL Y TIPO DE CAMBIO */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             <div className="bg-[#005a96] border-2 border-dashed border-blue-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-lg group transition-all text-left">
               <div className="bg-white/10 p-3 rounded-full mb-4">
@@ -93,12 +187,11 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                 </svg>
               </div>
               <h3 className="font-bold text-white text-sm mb-1">Arrastre su archivo Excel aquí</h3>
-              <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" />
+              <input type="file" ref={fileInputRef} onChange={procesarExcel} className="hidden" accept=".xlsx, .xls" />
               <p className="text-[10px] text-blue-100 opacity-80 mb-4 px-4">O haga clic y seleccione el archivo .xlsx con las columnas: Casilla, Concepto, Valor</p>
               <button onClick={() => fileInputRef.current?.click()} className="bg-white text-[#005a96] font-bold text-xs py-2 px-8 rounded-lg hover:bg-gray-100 transition-colors shadow-md">Seleccionar archivo</button>
             </div>
             
-            {/* TIPO DE CAMBIO CON ICONO SVG ORIGINAL */}
             <div className="bg-[#f0f7ff] p-6 rounded-2xl border border-[#d1e6ff] shadow-sm relative text-left">
               <div className="flex items-center gap-3 mb-4">
                 <div className="bg-[#0071BC] p-2 rounded-lg shadow-sm text-center flex items-center justify-center">
@@ -111,13 +204,12 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
               <p className="text-[#0071BC] text-sm font-medium mb-4 text-left">Vigente: 21 Abr 2026</p>
               <div className="relative">
                 <label className="text-[#003e6b] text-xs font-bold block mb-2 text-left">S/ por USD</label>
-                <input type="number" step="0.001" defaultValue="3.75" className="w-full p-3 bg-white border-2 border-[#0071BC] rounded-xl text-black font-bold text-xl outline-none focus:ring-4 focus:ring-blue-100 transition-all shadow-inner" />
+                <input type="number" step="0.001" value={datos.tipoCambio} onChange={(e) => actualizarDatos({tipoCambio: parseFloat(e.target.value)})} className="w-full p-3 bg-white border-2 border-[#0071BC] rounded-xl text-black font-bold text-xl outline-none focus:ring-4 focus:ring-blue-100 transition-all shadow-inner" />
               </div>
               <p className="mt-3 text-[#0071BC] text-[10px] font-medium italic text-left">Fuente: SBS - Puede editar manualmente</p>
             </div>
           </div>
 
-          {/* SUB-TABS */}
           <div className="flex space-x-4 mb-6 border-b text-left">
             {['IGV', 'RENTA'].map((t) => (
               <button key={t} onClick={() => setTab(t)} className={`pb-2 px-4 font-bold text-base transition-all ${tab === t ? 'text-[#0071BC] border-b-4 border-[#0071BC]' : 'text-gray-400 hover:text-gray-600'}`}>{t}</button>
@@ -127,7 +219,6 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
           <div className="text-left overflow-hidden">
             {tab === 'IGV' ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* VENTAS */}
                 <div>
                   <h4 className="font-bold text-gray-500 mb-4 border-b pb-1 text-base">Ventas Netas</h4>
                   <table className="w-full text-sm">
@@ -139,25 +230,30 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                         <td className="p-3 text-[#0071BC] font-bold">100</td>
                         <td className="p-3 text-gray-700 leading-tight text-black opacity-80">Ventas netas gravadas (Base imponible)</td>
                         <td className="p-3"><input type="text" value={datosIGV.c100} onChange={(e) => setDatosIGV({...datosIGV, c100: e.target.value})} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
-                        <td className="p-3 text-center"><div className="flex items-center justify-center space-x-1"><span className="h-3 w-3 rounded-full bg-green-500"></span><span className="text-green-600 font-bold text-xs whitespace-nowrap">Válido</span></div></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={true} /></td>
                       </tr>
                       <tr>
                         <td className="p-3 text-[#0071BC] font-bold">101</td>
                         <td className="p-3 text-gray-700 leading-tight text-black opacity-80">Ventas netas gravadas (Tributo)</td>
-                        <td className="p-3"><input type="text" value={datosIGV.c101} onChange={(e) => setDatosIGV({...datosIGV, c101: e.target.value})} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
-                        <td className="p-3 text-center"><div className="flex items-center justify-center space-x-1"><span className="h-3 w-3 rounded-full bg-green-500"></span><span className="text-green-600 font-bold text-xs whitespace-nowrap">Válido</span></div></td>
+                        <td className="p-3"><input type="text" value={datosIGV.c101} onChange={(e) => {
+                          const val = e.target.value;
+                          setDatosIGV({...datosIGV, c101: val, c131: val});
+                          // Re-validar si lo edita a mano
+                          const calc = Math.round((parseFloat(datosIGV.c100) || 0) * 0.18 * 100) / 100;
+                          setValidez(prev => ({...prev, c101: Math.abs(calc - parseFloat(val)) < 0.1}));
+                        }} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={validez.c101} /></td>
                       </tr>
                       <tr className="bg-gray-50 font-bold border-t-2">
                         <td className="p-3 text-[#0071BC]">131</td>
                         <td className="p-3 text-gray-700 uppercase">TOTAL VENTAS:</td>
-                        <td className="p-3"><input type="text" value={datosIGV.c131} onChange={(e) => setDatosIGV({...datosIGV, c131: e.target.value})} className="w-full border-2 border-[#0071BC] p-2 rounded-lg text-right bg-white text-black font-extrabold outline-none" placeholder="0" /></td>
+                        <td className="p-3"><input type="text" value={datosIGV.c131} readOnly className="w-full border-2 border-[#0071BC] p-2 rounded-lg text-right bg-gray-100 text-black font-extrabold outline-none cursor-not-allowed" placeholder="0" /></td>
                         <td></td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                {/* COMPRAS */}
                 <div>
                   <h4 className="font-bold text-gray-500 mb-4 border-b pb-1 text-base">Compras Netas</h4>
                   <table className="w-full text-sm">
@@ -169,18 +265,23 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                         <td className="p-3 text-[#0071BC] font-bold">107</td>
                         <td className="p-3 text-gray-700 leading-tight text-black opacity-80">Compras netas (Base imponible)</td>
                         <td className="p-3"><input type="text" value={datosIGV.c107} onChange={(e) => setDatosIGV({...datosIGV, c107: e.target.value})} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
-                        <td className="p-3 text-center"><div className="flex items-center justify-center space-x-1"><span className="h-3 w-3 rounded-full bg-green-500"></span><span className="text-green-600 font-bold text-xs whitespace-nowrap">Válido</span></div></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={true} /></td>
                       </tr>
                       <tr>
                         <td className="p-3 text-[#0071BC] font-bold">108</td>
                         <td className="p-3 text-gray-700 leading-tight text-black opacity-80">Compras netas gravadas (Tributo)</td>
-                        <td className="p-3"><input type="text" value={datosIGV.c108} onChange={(e) => setDatosIGV({...datosIGV, c108: e.target.value})} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
-                        <td className="p-3 text-center"><div className="flex items-center justify-center space-x-1"><span className="h-3 w-3 rounded-full bg-red-500"></span><span className="text-red-600 font-bold text-xs whitespace-nowrap">Diferencia</span></div></td>
+                        <td className="p-3"><input type="text" value={datosIGV.c108} onChange={(e) => {
+                          const val = e.target.value;
+                          setDatosIGV({...datosIGV, c108: val, c178: val});
+                          const calc = Math.round((parseFloat(datosIGV.c107) || 0) * 0.18 * 100) / 100;
+                          setValidez(prev => ({...prev, c108: Math.abs(calc - parseFloat(val)) < 0.1}));
+                        }} className="w-full border-2 border-gray-400 p-2 rounded-lg text-right text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0" /></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={validez.c108} /></td>
                       </tr>
                       <tr className="bg-gray-50 font-bold border-t-2">
                         <td className="p-3 text-[#0071BC]">178</td>
                         <td className="p-3 text-gray-700 uppercase">TOTAL COMPRAS:</td>
-                        <td className="p-3"><input type="text" value={datosIGV.c178} onChange={(e) => setDatosIGV({...datosIGV, c178: e.target.value})} className="w-full border-2 border-[#0071BC] p-2 rounded-lg text-right bg-white text-black font-extrabold outline-none" placeholder="0" /></td>
+                        <td className="p-3"><input type="text" value={datosIGV.c178} readOnly className="w-full border-2 border-[#0071BC] p-2 rounded-lg text-right bg-gray-100 text-black font-extrabold outline-none cursor-not-allowed" placeholder="0" /></td>
                         <td></td>
                       </tr>
                     </tbody>
@@ -188,16 +289,26 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                 </div>
               </div>
             ) : (
-              /* RENTA*/
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-6">
-                  {/* PREGUNTAS IZQUIERDA*/}
                   <div className="flex justify-between items-center p-4 bg-white rounded-xl border-2 border-gray-100 shadow-sm">
                     <span className="text-sm font-bold text-gray-700">¿Posee alguna suspensión de pagos o cuenta?</span>
                     <div className="flex items-center space-x-3">
-                      <span className="text-xs font-bold text-gray-400">{suspension ? 'Sí' : 'No'}</span>
-                      <div onClick={() => setSuspension(!suspension)} className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${suspension ? 'bg-[#0071BC]' : 'bg-gray-300'}`}>
-                        <div className={`bg-white w-4 h-4 rounded-full transform transition-transform ${suspension ? 'translate-x-6' : ''}`}></div>
+                      <span className="text-xs font-bold text-gray-400">{datos.suspensionPagos ? 'Sí' : 'No'}</span>
+                      <div onClick={() => {
+                        const nuevoEstado = !datos.suspensionPagos;
+                        if (!nuevoEstado) {
+                          actualizarDatos({
+                            suspensionPagos: false,
+                            numeroResolucion: '',
+                            fechaModificacion: '',
+                            coeficienteSunat: 0
+                          });
+                        } else {
+                          actualizarDatos({ suspensionPagos: true });
+                        }
+                      }} className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${datos.suspensionPagos ? 'bg-[#0071BC]' : 'bg-gray-300'}`}>
+                        <div className={`bg-white w-4 h-4 rounded-full transform transition-transform ${datos.suspensionPagos ? 'translate-x-6' : ''}`}></div>
                       </div>
                     </div>
                   </div>
@@ -205,34 +316,33 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                   <div className="flex justify-between items-center p-4 bg-white rounded-xl border-2 border-gray-100 shadow-sm">
                     <span className="text-sm font-bold text-gray-700 leading-tight">¿Presentó un formulario PDT 625 actualizado?</span>
                     <div className="flex items-center space-x-3">
-                      <span className="text-xs font-bold text-gray-400">{pdt625 ? 'Sí' : 'No'}</span>
-                      <div onClick={() => setPdt625(!pdt625)} className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${pdt625 ? 'bg-[#0071BC]' : 'bg-gray-400'}`}>
-                        <div className={`bg-white w-4 h-4 rounded-full transform transition-transform ${pdt625 ? 'translate-x-6' : ''}`}></div>
+                      <span className="text-xs font-bold text-gray-400">{datos.pdt625 ? 'Sí' : 'No'}</span>
+                      <div onClick={() => actualizarDatos({pdt625: !datos.pdt625})} className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${datos.pdt625 ? 'bg-[#0071BC]' : 'bg-gray-400'}`}>
+                        <div className={`bg-white w-4 h-4 rounded-full transform transition-transform ${datos.pdt625 ? 'translate-x-6' : ''}`}></div>
                       </div>
                     </div>
                   </div>
 
                   <div className="relative group">
-                    <label className="text-sm font-bold text-gray-700 block mb-2 text-left">Número de Res Int: <span className="text-[#0071BC] cursor-help">ⓘ</span>
+                    <label className={`text-sm font-bold block mb-2 text-left ${!datos.suspensionPagos ? 'text-gray-400' : 'text-gray-700'}`}>Número de Res Int: <span className="text-[#0071BC] cursor-help">ⓘ</span>
                       <div className="absolute left-32 bottom-full mb-2 hidden group-hover:block w-40 p-2 bg-gray-800 text-white text-[10px] rounded shadow-lg z-50">Ingrese el número de resolución de intendencia.</div>
                     </label>
-                    <input type="text" value={datosRenta.numRes} onChange={(e) => setDatosRenta({...datosRenta, numRes: e.target.value})} className="w-full border-2 border-gray-400 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC]" placeholder="Ingrese número" />
+                    <input type="text" value={datos.numeroResolucion} onChange={(e) => actualizarDatos({numeroResolucion: e.target.value})} disabled={!datos.suspensionPagos} className={`w-full border-2 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC] ${!datos.suspensionPagos ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-60' : 'border-gray-400'}`} placeholder="Ingrese número" />
                   </div>
 
                   <div className="relative group">
-                    <label className="text-sm font-bold text-gray-700 block mb-2 text-left">Fecha de modificación: <span className="text-[#0071BC] cursor-help">ⓘ</span>
+                    <label className={`text-sm font-bold block mb-2 text-left ${!datos.suspensionPagos ? 'text-gray-400' : 'text-gray-700'}`}>Fecha de modificación: <span className="text-[#0071BC] cursor-help">ⓘ</span>
                       <div className="absolute left-40 bottom-full mb-2 hidden group-hover:block w-40 p-2 bg-gray-800 text-white text-[10px] rounded shadow-lg z-50">DD/MM/AAAA (ej: 12/03/2026).</div>
                     </label>
-                    <input type="text" value={datosRenta.fechaMod} onChange={(e) => setDatosRenta({...datosRenta, fechaMod: e.target.value})} className="w-full border-2 border-gray-400 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC]" placeholder="DD/MM/AAAA" />
+                    <input type="text" value={datos.fechaModificacion} onChange={(e) => actualizarDatos({fechaModificacion: e.target.value})} disabled={!datos.suspensionPagos} className={`w-full border-2 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC] ${!datos.suspensionPagos ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-60' : 'border-gray-400'}`} placeholder="DD/MM/AAAA" />
                   </div>
 
                   <div className="relative group">
-                    <label className="text-sm font-bold text-gray-700 block mb-2 text-left">Coeficiente SUNAT: <span className="text-[#0071BC] cursor-help">ⓘ</span></label>
-                    <input type="text" value={datosRenta.coefSunat} onChange={(e) => setDatosRenta({...datosRenta, coefSunat: e.target.value})} className="w-full border-2 border-gray-400 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC]" placeholder="0.0000" />
+                    <label className={`text-sm font-bold block mb-2 text-left ${!datos.suspensionPagos ? 'text-gray-400' : 'text-gray-700'}`}>Coeficiente SUNAT: <span className="text-[#0071BC] cursor-help">ⓘ</span></label>
+                    <input type="text" value={datos.coeficienteSunat} onChange={(e) => actualizarDatos({coeficienteSunat: parseFloat(e.target.value) || 0})} disabled={!datos.suspensionPagos} className={`w-full border-2 p-3 rounded-xl text-black font-bold outline-none focus:border-[#0071BC] ${!datos.suspensionPagos ? 'bg-gray-100 border-gray-300 cursor-not-allowed opacity-60' : 'border-gray-400'}`} placeholder="0.0000" />
                   </div>
                 </div>
 
-                {/* TABLA DERECHA RENTA */}
                 <div>
                   <h4 className="font-bold text-gray-500 border-b pb-1 text-base italic mb-4">Estado de Ganancia y Pérdida</h4>
                   <table className="w-full text-sm font-bold">
@@ -240,18 +350,26 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
                       <tr><th className="p-3 text-left">Casilla</th><th className="p-3 text-left">Concepto</th><th className="p-3 text-right">Valor</th><th className="p-3 text-center">Estado</th></tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {[
-                        {c: "380", t: "Coeficiente - Artículo 85", v: datosRenta.c380, k: "c380", e: true},
-                        {c: "315", t: "Porcentaje – Artículo 85°", v: datosRenta.c315, k: "c315", e: true},
-                        {c: "312", t: "Ingresos netos (Tributo)", v: datosRenta.c312, k: "c312", e: false},
-                        {c: "301", t: "Ingresos Netos (Base imponible)", v: datosRenta.c301, k: "c301", e: false}
-                      ].map((row, idx) => (
-                        <tr key={idx}>
-                          <td className="p-3 text-[#0071BC]">{row.c}</td><td className="p-3 text-gray-700 leading-tight">{row.t}</td>
-                          <td className="p-3"><input type="text" value={row.v} onChange={(e) => setDatosRenta({...datosRenta, [row.k]: e.target.value})} className="w-full border-2 border-gray-300 p-2 rounded-lg text-right text-black font-bold outline-none" placeholder="0" /></td>
-                          <td className="p-3 text-center">{row.e && <div className="flex items-center justify-center space-x-1"><span className="h-3 w-3 rounded-full bg-green-500"></span><span className="text-green-600 font-bold text-xs whitespace-nowrap">Válido</span></div>}</td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <td className="p-3 text-[#0071BC]">380</td><td className="p-3 text-gray-700 leading-tight">Coeficiente - Artículo 85</td>
+                        <td className="p-3"><input type="text" value={current380} onChange={(e) => setDatosRenta({...datosRenta, c380: e.target.value})} readOnly={isEspecial} className={`w-full border-2 border-gray-300 p-2 rounded-lg text-right text-black font-bold outline-none ${isEspecial ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="0" /></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={true} /></td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-[#0071BC]">315</td><td className="p-3 text-gray-700 leading-tight">Porcentaje – Artículo 85°</td>
+                        <td className="p-3"><input type="text" value={current315} onChange={(e) => setDatosRenta({...datosRenta, c315: e.target.value})} readOnly={isEspecial || isMype || isGeneral} className={`w-full border-2 border-gray-300 p-2 rounded-lg text-right text-black font-bold outline-none ${isEspecial || isMype || isGeneral ? 'bg-gray-100 cursor-not-allowed' : ''}`} placeholder="0" /></td>
+                        <td className="p-3 text-center"><RenderSemaforo esValido={true} /></td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-[#0071BC]">312</td><td className="p-3 text-gray-700 leading-tight">Ingresos netos (Tributo)</td>
+                        <td className="p-3"><input type="text" value={calc312} readOnly className="w-full border-2 border-[#0071BC] p-2 rounded-lg text-right bg-gray-100 text-black font-extrabold outline-none cursor-not-allowed" placeholder="0" /></td>
+                        <td className="p-3 text-center"></td>
+                      </tr>
+                      <tr>
+                        <td className="p-3 text-[#0071BC]">301</td><td className="p-3 text-gray-700 leading-tight">Ingresos Netos (Base imponible)</td>
+                        <td className="p-3"><input type="text" value={datosRenta.c301} onChange={(e) => setDatosRenta({...datosRenta, c301: e.target.value})} className="w-full border-2 border-gray-300 p-2 rounded-lg text-right text-black font-bold outline-none" placeholder="0" /></td>
+                        <td className="p-3 text-center"></td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -259,10 +377,9 @@ export default function Seccion2({ alAnterior, alSiguiente }: { alAnterior: () =
             )}
           </div>
 
-          {/* BOTONES */}
           <div className="mt-12 flex justify-center space-x-6">
             <button onClick={alAnterior} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-12 rounded-xl transition-all shadow-md active:scale-95">Anterior</button>
-            <button onClick={alSiguiente} className="bg-[#0071BC] hover:bg-[#005a96] text-white font-bold py-3 px-12 rounded-xl transition-all shadow-md transform hover:scale-105 active:scale-95">Siguiente</button>
+            <button onClick={handleSiguiente} className="bg-[#0071BC] hover:bg-[#005a96] text-white font-bold py-3 px-12 rounded-xl transition-all shadow-md transform hover:scale-105 active:scale-95">Siguiente</button>
           </div>
         </div>
       </div>

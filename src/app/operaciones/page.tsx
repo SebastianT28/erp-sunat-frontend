@@ -9,21 +9,61 @@ import SeccionPago from './SeccionPago';
 export default function PaginaOperaciones() {
   const [paso, setPaso] = useState(1);
 
+  // ESTADO GLOBAL
+  const [formData, setFormData] = useState({
+    periodoTributario: '',
+    tipoDeclaracion: '',
+    condicionIgv: 'Cuenta propia',
+    ventasNoGravadas: false,
+    ivap: true,
+    regimenTributario: '',
+    otrosRegimenes: '',
+    tipoCambio: 3.75,
+    suspensionPagos: false,
+    pdt625: false,
+    numeroResolucion: '',
+    fechaModificacion: '',
+    coeficienteSunat: 0.0,
+    casillas: [] as { numeroCasilla: string, valor: number }[]
+  });
+
+  const actualizarDatos = (nuevosDatos: any) => {
+    setFormData(prev => ({ ...prev, ...nuevosDatos }));
+  };
+
   // Navegar entre secciones
   const irASiguiente = () => setPaso(paso + 1);
   const irAAnterior = () => setPaso(paso - 1);
-  const irAPago = () => setPaso(4);
-
+  
   const finalizarTodo = () => {
     alert("Trámite finalizado con éxito.");
-    setPaso(1); // Opcional: Reiniciar al inicio
+    setPaso(1);
   };
 
   return (
     <main>
-      {paso === 1 && <Seccion1 alSiguiente={irASiguiente} />}
-      {paso === 2 && <Seccion2 alAnterior={irAAnterior} alSiguiente={irASiguiente} />}
-      {paso === 3 && <Seccion3 alAnterior={irAAnterior} alPago={irAPago} />}
+      {paso === 1 && (
+        <Seccion1 
+          alSiguiente={irASiguiente} 
+          datos={formData} 
+          actualizarDatos={actualizarDatos} 
+        />
+      )}
+      {paso === 2 && (
+        <Seccion2 
+          alAnterior={irAAnterior} 
+          alSiguiente={irASiguiente} 
+          datos={formData} 
+          actualizarDatos={actualizarDatos} 
+        />
+      )}
+      {paso === 3 && (
+        <Seccion3 
+          alAnterior={irAAnterior} 
+          alPago={() => setPaso(4)} 
+          datos={formData} 
+        />
+      )}
       {paso === 4 && (
         <SeccionPago 
           alFinalizar={finalizarTodo} 
