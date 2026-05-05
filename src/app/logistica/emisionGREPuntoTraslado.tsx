@@ -24,7 +24,7 @@ const ubigeoPeru: Record<string, Record<string, string[]>> = {
     }
 }
 
-interface Direccion {
+export interface Direccion {
     departamento: string
     provincia: string
     distrito: string
@@ -33,7 +33,7 @@ interface Direccion {
 
 interface EmisionGREPuntoTrasladoProps {
     onVolver?: () => void
-    onSiguiente?: () => void
+    onSiguiente?: (partida: Direccion, llegada: Direccion) => void
 }
 
 export default function EmisionGREPuntoTraslado({ onVolver, onSiguiente }: EmisionGREPuntoTrasladoProps) {
@@ -198,7 +198,7 @@ export default function EmisionGREPuntoTraslado({ onVolver, onSiguiente }: Emisi
                     Volver
                 </button>
                 <button
-                    onClick={onSiguiente}
+                    onClick={() => { if (puntoPartida && puntoLlegada) onSiguiente?.(puntoPartida, puntoLlegada) }}
                     disabled={!puedeSiguiente}
                     className={`px-10 py-2 font-extrabold text-sm shadow transition-colors ${puedeSiguiente
                             ? "bg-[#0063AE] text-white hover:bg-[#004d8a] cursor-pointer"

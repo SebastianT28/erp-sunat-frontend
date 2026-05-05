@@ -21,13 +21,13 @@ interface Autorizacion {
     numero: string
 }
 
-interface Vehiculo {
+export interface Vehiculo {
     placa: string
     entidad: string
     numeroAutorizacion: string
 }
 
-interface Conductor {
+export interface Conductor {
     licencia: string
     tipoDocumento: string
     numeroDocumento: string
@@ -36,7 +36,7 @@ interface Conductor {
 
 interface EmisionGRETransporteProps {
     onVolver?: () => void
-    onEmitir?: () => void
+    onEmitir?: (data: { vehiculo: Vehiculo; conductor: Conductor; modalidad: string; fechaInicio: string }) => void
 }
 
 export default function EmisionGRETransporte({ onVolver, onEmitir }: EmisionGRETransporteProps) {
@@ -297,7 +297,7 @@ export default function EmisionGRETransporte({ onVolver, onEmitir }: EmisionGRET
                     Volver
                 </button>
                 <button
-                    onClick={onEmitir}
+                    onClick={() => { if (puedeEmitir) onEmitir?.({ vehiculo: vehiculos[0], conductor: conductores[0], modalidad, fechaInicio }) }}
                     disabled={!puedeEmitir}
                     className={`px-10 py-2 font-extrabold text-sm shadow transition-colors ${puedeEmitir
                         ? "bg-[#0063AE] text-white hover:bg-[#004d8a] cursor-pointer"
