@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "pagos_nps")
+@Table(name = "pagos_nps", schema = "produccion")
 public class PagoNPS {
 
     @Id

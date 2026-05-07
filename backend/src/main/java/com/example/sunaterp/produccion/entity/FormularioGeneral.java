@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "formularios_generales")
+@Table(name = "formularios_generales", schema = "produccion")
 public class FormularioGeneral {
 
     @Id

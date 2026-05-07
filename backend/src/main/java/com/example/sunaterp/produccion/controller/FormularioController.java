@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/produccion/formularios")
-@CrossOrigin(origins = "*")
 public class FormularioController {
 
     @Autowired

@@ -17,7 +17,7 @@ interface DocumentoRelacionado {
 
 interface EmisionGREDocProps {
   onVolver?: () => void
-  onSiguiente?: () => void
+  onSiguiente?: (documentos: DocumentoRelacionado[]) => void
 }
 
 export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocProps) {
@@ -30,7 +30,38 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
   const [modalSerie, setModalSerie] = useState("")
   const [modalNumero, setModalNumero] = useState("")
 
-  const puedeAgregar = modalTipo !== "" && modalSerie.trim() !== "" && modalNumero.trim() !== ""
+  const [buscando, setBuscando] = useState(false)
+  const [encontradoFactura, setEncontradoFactura] = useState(false)
+  const [mensajeBusqueda, setMensajeBusqueda] = useState("")
+
+  const puedeAgregar = modalTipo !== "" && modalSerie.trim() !== "" && modalNumero.trim() !== "" && (modalTipo !== "Factura" || encontradoFactura)
+
+  const validarFactura = async () => {
+    if (modalSerie.trim() === "" || modalNumero.trim() === "") return
+    setBuscando(true)
+    setMensajeBusqueda("")
+    setEncontradoFactura(false)
+    try {
+      const res = await fetch(`http://localhost:8080/api/logistica/factura/validar?serie=${modalSerie.trim()}&numero=${modalNumero.trim()}`)
+      const data = await res.json()
+      if (data.success && data.existe) {
+        setEncontradoFactura(true)
+        setMensajeBusqueda("✅ Factura validada correctamente")
+      } else {
+        setEncontradoFactura(false)
+        setMensajeBusqueda("❌ La factura no existe en la base de datos")
+      }
+    } catch (error) {
+      setEncontradoFactura(false)
+      setMensajeBusqueda("❌ Error de conexión al validar")
+    } finally {
+      setBuscando(false)
+    }
+  }
+
+  const handleTipoChange = (val: string) => { setModalTipo(val); setEncontradoFactura(false); setMensajeBusqueda("") }
+  const handleSerieChange = (val: string) => { setModalSerie(val); setEncontradoFactura(false); setMensajeBusqueda("") }
+  const handleNumeroChange = (val: string) => { setModalNumero(val); setEncontradoFactura(false); setMensajeBusqueda("") }
 
   const handleAgregar = () => {
     if (!puedeAgregar) return
@@ -51,6 +82,8 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
     setModalTipo("")
     setModalSerie("")
     setModalNumero("")
+    setEncontradoFactura(false)
+    setMensajeBusqueda("")
   }
 
   const handleEliminarDocumento = (index: number) => {
@@ -116,7 +149,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
           Volver
         </button>
         <button
-          onClick={onSiguiente}
+          onClick={() => onSiguiente?.(documentos)}
           disabled={documentos.length === 0}
           className={`px-10 py-2 font-extrabold text-sm shadow transition-colors ${
             documentos.length > 0
@@ -155,7 +188,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
                   </label>
                   <select
                     value={modalTipo}
-                    onChange={(e) => setModalTipo(e.target.value)}
+                    onChange={(e) => handleTipoChange(e.target.value)}
                     className="border border-gray-300 px-3 py-2 text-sm text-black w-full focus:outline-none focus:border-[#0063AE] bg-white"
                   >
                     <option value="">Seleccione</option>
@@ -188,7 +221,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
                   <input
                     type="text"
                     value={modalSerie}
-                    onChange={(e) => setModalSerie(e.target.value)}
+                    onChange={(e) => handleSerieChange(e.target.value)}
                     placeholder="ESCRIBA"
                     className="border border-gray-300 px-3 py-2 text-sm text-black w-full focus:outline-none focus:border-[#0063AE] placeholder-gray-400 uppercase"
                   />
@@ -202,12 +235,21 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
                   <input
                     type="text"
                     value={modalNumero}
-                    onChange={(e) => setModalNumero(e.target.value)}
+                    onChange={(e) => handleNumeroChange(e.target.value)}
                     placeholder="ESCRIBA"
                     className="border border-gray-300 px-3 py-2 text-sm text-black w-full focus:outline-none focus:border-[#0063AE] placeholder-gray-400 uppercase"
                   />
                 </div>
               </div>
+
+              {modalTipo === "Factura" && (
+                 <div className="mb-6 flex items-center gap-4">
+                    <button onClick={validarFactura} disabled={buscando || modalSerie.trim() === "" || modalNumero.trim() === ""} className="bg-[#3399ff] text-white px-6 py-2 font-extrabold text-xs shadow hover:bg-[#007bff] transition-colors disabled:bg-gray-400">
+                      {buscando ? "Validando..." : "Validar Factura"}
+                    </button>
+                    {mensajeBusqueda && <span className={`text-sm font-bold ${encontradoFactura ? 'text-green-600' : 'text-red-500'}`}>{mensajeBusqueda}</span>}
+                 </div>
+              )}
 
               {/* Botón Agregar */}
               <div className="flex justify-end">

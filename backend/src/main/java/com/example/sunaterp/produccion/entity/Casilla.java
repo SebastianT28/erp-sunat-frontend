@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "casillas")
+@Table(name = "casillas", schema = "produccion")
 public class Casilla {
 
     @Id
