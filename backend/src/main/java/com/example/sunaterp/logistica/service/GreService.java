@@ -1,5 +1,7 @@
 package com.example.sunaterp.logistica.service;
 
+import com.example.sunaterp.login.entity.Usuario;
+import com.example.sunaterp.login.repository.UsuarioRepository;
 import com.example.sunaterp.logistica.dto.*;
 import com.example.sunaterp.logistica.entity.*;
 import com.example.sunaterp.logistica.repository.*;

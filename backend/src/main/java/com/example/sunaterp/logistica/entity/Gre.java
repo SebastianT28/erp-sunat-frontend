@@ -1,5 +1,6 @@
 package com.example.sunaterp.logistica.entity;
 
+import com.example.sunaterp.login.entity.Usuario;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;

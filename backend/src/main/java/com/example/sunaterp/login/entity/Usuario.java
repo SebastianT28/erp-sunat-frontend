@@ -1,9 +1,9 @@
-package com.example.sunaterp.logistica.entity;
+package com.example.sunaterp.login.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "usuario", schema = "logistica")
+@Table(name = "usuario", schema = "login")
 public class Usuario {
 
     @Id

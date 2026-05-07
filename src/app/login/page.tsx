@@ -12,13 +12,56 @@ export default function Login() {
   const [usuario, setUsuario] = useState("")
   const [password, setPassword] = useState("")
   const [guardarDatos, setGuardarDatos] = useState(false)
+  const [error, setError] = useState("")
 
-  const handleLogin = () => {
-    // IMPORTANTE: Verifica que estas carpetas existan en src/app/
-    if (tipo === "admin") {
-      router.push("/gerenciaGeneral")
-    } else {
-      router.push("/dashboard")
+  const handleLogin = async () => {
+    setError("")
+    if (tipo === "usuario" && !ruc.trim()) {
+      setError("El RUC es requerido para usuarios.")
+      return
+    }
+    if (!usuario.trim() || !password.trim()) {
+      setError("Usuario y contraseña son requeridos.")
+      return
+    }
+
+    try {
+      const res = await fetch("http://localhost:8080/api/login/usuarios/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ruc: tipo === "usuario" ? ruc.trim() : null,
+          nombreUsuario: usuario.trim(),
+          contrasena: password.trim()
+        })
+      })
+
+      if (!res.ok) {
+        const errorText = await res.text()
+        setError(errorText || "Error al iniciar sesión")
+        return
+      }
+
+      const data = await res.json()
+      
+      if (tipo === "admin" && data.rol?.toLowerCase() !== "administrador") {
+         setError("Acceso denegado: No tienes permisos de administrador.")
+         return
+      }
+
+      if (tipo === "usuario" && data.rol?.toLowerCase() !== "contribuyente") {
+         setError("Acceso denegado: Por favor usa la pestaña correspondiente a tu rol.")
+         return
+      }
+
+      if (data.rol?.toLowerCase() === "administrador") {
+        router.push("/gerenciaGeneral")
+      } else {
+        router.push("/dashboard")
+      }
+
+    } catch (err) {
+      setError("Error de conexión con el servidor.")
     }
   }
 
@@ -109,6 +152,12 @@ export default function Login() {
                 className="border border-gray-300 px-4 py-3 text-black placeholder-black/40 focus:outline-none focus:border-[#0063AE]"
               />
             </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm font-semibold text-center">
+                {error}
+              </div>
+            )}
 
             {/* Checkbox Guardar Datos */}
             <div className="flex items-center justify-between mt-5">

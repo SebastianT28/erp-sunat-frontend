@@ -14,10 +14,10 @@ import java.util.List;
 public class EmisionGreDTO {
 
     // Paso 1 - Datos de emisión
-    private String tipoGuia;          // "remitente" o "transportista"
+    private String tipoGuia; // "remitente" o "transportista"
     private String motivoTraslado;
     private DestinatarioDTO destinatario;
-    private Integer idUsuario;        // ID del usuario que emite
+    private Integer idUsuario; // ID del usuario que emite
 
     // Paso 2 - Documentos relacionados
     private List<DocumentoRelacionadoDTO> documentosRelacionados;
@@ -32,32 +32,78 @@ public class EmisionGreDTO {
     // Paso 5 - Datos del transporte
     private TransporteDTO transporte;
 
-    public EmisionGreDTO() {}
+    public EmisionGreDTO() {
+    }
 
-    public String getTipoGuia() { return tipoGuia; }
-    public void setTipoGuia(String tipoGuia) { this.tipoGuia = tipoGuia; }
+    public String getTipoGuia() {
+        return tipoGuia;
+    }
 
-    public String getMotivoTraslado() { return motivoTraslado; }
-    public void setMotivoTraslado(String motivoTraslado) { this.motivoTraslado = motivoTraslado; }
+    public void setTipoGuia(String tipoGuia) {
+        this.tipoGuia = tipoGuia;
+    }
 
-    public DestinatarioDTO getDestinatario() { return destinatario; }
-    public void setDestinatario(DestinatarioDTO destinatario) { this.destinatario = destinatario; }
+    public String getMotivoTraslado() {
+        return motivoTraslado;
+    }
 
-    public Integer getIdUsuario() { return idUsuario; }
-    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
+    public void setMotivoTraslado(String motivoTraslado) {
+        this.motivoTraslado = motivoTraslado;
+    }
 
-    public List<DocumentoRelacionadoDTO> getDocumentosRelacionados() { return documentosRelacionados; }
-    public void setDocumentosRelacionados(List<DocumentoRelacionadoDTO> documentosRelacionados) { this.documentosRelacionados = documentosRelacionados; }
+    public DestinatarioDTO getDestinatario() {
+        return destinatario;
+    }
 
-    public List<BienDTO> getBienes() { return bienes; }
-    public void setBienes(List<BienDTO> bienes) { this.bienes = bienes; }
+    public void setDestinatario(DestinatarioDTO destinatario) {
+        this.destinatario = destinatario;
+    }
 
-    public PuntoTrasladoDTO getPuntoPartida() { return puntoPartida; }
-    public void setPuntoPartida(PuntoTrasladoDTO puntoPartida) { this.puntoPartida = puntoPartida; }
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
 
-    public PuntoTrasladoDTO getPuntoLlegada() { return puntoLlegada; }
-    public void setPuntoLlegada(PuntoTrasladoDTO puntoLlegada) { this.puntoLlegada = puntoLlegada; }
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 
-    public TransporteDTO getTransporte() { return transporte; }
-    public void setTransporte(TransporteDTO transporte) { this.transporte = transporte; }
+    public List<DocumentoRelacionadoDTO> getDocumentosRelacionados() {
+        return documentosRelacionados;
+    }
+
+    public void setDocumentosRelacionados(List<DocumentoRelacionadoDTO> documentosRelacionados) {
+        this.documentosRelacionados = documentosRelacionados;
+    }
+
+    public List<BienDTO> getBienes() {
+        return bienes;
+    }
+
+    public void setBienes(List<BienDTO> bienes) {
+        this.bienes = bienes;
+    }
+
+    public PuntoTrasladoDTO getPuntoPartida() {
+        return puntoPartida;
+    }
+
+    public void setPuntoPartida(PuntoTrasladoDTO puntoPartida) {
+        this.puntoPartida = puntoPartida;
+    }
+
+    public PuntoTrasladoDTO getPuntoLlegada() {
+        return puntoLlegada;
+    }
+
+    public void setPuntoLlegada(PuntoTrasladoDTO puntoLlegada) {
+        this.puntoLlegada = puntoLlegada;
+    }
+
+    public TransporteDTO getTransporte() {
+        return transporte;
+    }
+
+    public void setTransporte(TransporteDTO transporte) {
+        this.transporte = transporte;
+    }
 }
