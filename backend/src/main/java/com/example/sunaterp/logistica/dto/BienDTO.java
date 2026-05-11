@@ -8,6 +8,7 @@ public class BienDTO {
     private String unidadMedida;
     private BigDecimal peso;
     private Integer cantidad;
+    private Boolean normalizado;
 
     public BienDTO() {}
 
@@ -25,4 +26,7 @@ public class BienDTO {
 
     public Integer getCantidad() { return cantidad; }
     public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+
+    public Boolean getNormalizado() { return normalizado; }
+    public void setNormalizado(Boolean normalizado) { this.normalizado = normalizado; }
 }

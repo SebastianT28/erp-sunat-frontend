@@ -130,6 +130,7 @@ export default function EmisionGRE() {
         unidadMedida: b.unidad,
         peso: parseFloat(b.peso) || 0,
         cantidad: parseInt(b.cantidad) || 1,
+        normalizado: b.normalizado,
       })),
       puntoPartida: puntoPartida ? {
         tipo: "partida",

@@ -76,6 +76,8 @@ public class GreService {
                 bien.setDescripcion(bienDTO.getDescripcion());
                 bien.setUnidadMedida(bienDTO.getUnidadMedida());
                 bien.setPeso(bienDTO.getPeso());
+                bien.setCantidad(bienDTO.getCantidad());
+                bien.setNormalizado(bienDTO.getNormalizado() != null ? bienDTO.getNormalizado() : false);
 
                 DetalleGre detalle = new DetalleGre();
                 detalle.setBien(bien);
