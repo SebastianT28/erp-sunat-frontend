@@ -48,6 +48,13 @@ public class UsuarioController {
         responseDTO.setCorreo(usuario.getCorreo());
         responseDTO.setRol(usuario.getRol());
 
+        if (usuario.getContribuyente() != null) {
+            com.example.sunaterp.login.dto.ContribuyenteDTO cDTO = new com.example.sunaterp.login.dto.ContribuyenteDTO();
+            cDTO.setRuc(usuario.getContribuyente().getRuc());
+            cDTO.setRazonSocial(usuario.getContribuyente().getRazonSocial());
+            responseDTO.setContribuyente(cDTO);
+        }
+
         return ResponseEntity.ok(responseDTO);
     }
 

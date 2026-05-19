@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface DestinatarioRepository extends JpaRepository<Destinatario, Integer> {
 
-    Optional<Destinatario> findByNumeroDocumento(String numeroDocumento);
+    Optional<Destinatario> findFirstByNumeroDocumento(String numeroDocumento);
 }

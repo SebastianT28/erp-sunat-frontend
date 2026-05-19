@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import EmisionGREDoc from "./emisionGREDoc"
 import EmisionGREBienes from "./emisionGREBienes"
 import type { Bien } from "./emisionGREBienes"
 import EmisionGREPuntoTraslado from "./emisionGREPuntoTraslado"
 import type { Direccion } from "./emisionGREPuntoTraslado"
 import EmisionGRETransporte from "./emisionGRETransporte"
-import type { Vehiculo, Conductor } from "./emisionGRETransporte"
+import EmisionGREPreview from "./emisionGREPreview"
+import type { DatosTransporte } from "./emisionGREPreview"
 
 const API_URL = "http://localhost:8080/api/logistica/gre"
 
@@ -37,10 +38,26 @@ export default function EmisionGRE() {
   const [bienes, setBienes] = useState<Bien[]>([])
   const [puntoPartida, setPuntoPartida] = useState<Direccion | null>(null)
   const [puntoLlegada, setPuntoLlegada] = useState<Direccion | null>(null)
-
-  // Estado de envío
-  const [enviando, setEnviando] = useState(false)
+  const [transporteData, setTransporteData] = useState<DatosTransporte | null>(null)
   const [resultado, setResultado] = useState<{ success: boolean; message: string } | null>(null)
+
+  const [usuarioInfo, setUsuarioInfo] = useState({ ruc: "20498697381", razonSocial: "TRANSPORTES ELIO S.A.C.", idUsuario: 1 })
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("user")
+        if (stored) {
+          const u = JSON.parse(stored)
+          setUsuarioInfo({
+            ruc: u.contribuyente?.ruc || "20498697381",
+            razonSocial: u.contribuyente?.razonSocial || "TRANSPORTES ELIO S.A.C.",
+            idUsuario: u.idUsuario || 1
+          })
+        }
+      } catch (e) {}
+    }
+  }, [])
 
   // Modal destinatario
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -103,79 +120,6 @@ export default function EmisionGRE() {
   const motivos = comercioExterior ? motivosExterior : motivosNacional
   const puedeSiguiente = motivoTraslado !== "" && destinatarios.length > 0
 
-  // Handler para emitir GRE al backend
-  const handleEmitirGRE = async (transporteData: { vehiculo: Vehiculo; conductor: Conductor; modalidad: string; fechaInicio: string }) => {
-    setEnviando(true)
-    setResultado(null)
-
-    const dest = destinatarios[0]
-    const payload = {
-      tipoGuia,
-      motivoTraslado,
-      idUsuario: 1,
-      destinatario: {
-        tipoDocumentoIdentidad: dest.tipoDoc,
-        numeroDocumento: dest.numDoc,
-        nombre: dest.nombre,
-      },
-      documentosRelacionados: documentos.map(d => ({
-        tipo: d.tipo,
-        serie: d.serie,
-        numero: d.numero,
-        fecha: new Date().toISOString().split("T")[0],
-      })),
-      bienes: bienes.map(b => ({
-        codigoBien: b.codigo,
-        descripcion: b.descripcion,
-        unidadMedida: b.unidad,
-        peso: parseFloat(b.peso) || 0,
-        cantidad: parseInt(b.cantidad) || 1,
-        normalizado: b.normalizado,
-      })),
-      puntoPartida: puntoPartida ? {
-        tipo: "partida",
-        direccion: { departamento: puntoPartida.departamento, provincia: puntoPartida.provincia, distrito: puntoPartida.distrito, direccionDetallada: puntoPartida.direccionDetallada },
-      } : null,
-      puntoLlegada: puntoLlegada ? {
-        tipo: "llegada",
-        direccion: { departamento: puntoLlegada.departamento, provincia: puntoLlegada.provincia, distrito: puntoLlegada.distrito, direccionDetallada: puntoLlegada.direccionDetallada },
-      } : null,
-      transporte: {
-        tipoTransporte: transporteData.modalidad,
-        fechaInicioTraslado: transporteData.fechaInicio,
-        vehiculo: {
-          placa: transporteData.vehiculo.placa,
-          entidadEmisora: transporteData.vehiculo.entidad,
-          numeroAutorizacion: transporteData.vehiculo.numeroAutorizacion,
-        },
-        conductor: {
-          nombre: transporteData.conductor.nombres,
-          tipoDocumentoIdentidad: transporteData.conductor.tipoDocumento,
-          numeroDocumento: transporteData.conductor.numeroDocumento,
-          numeroLicencia: transporteData.conductor.licencia,
-        },
-      },
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/emitir`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-      const data = await response.json()
-      if (data.success) {
-        setResultado({ success: true, message: `✅ GRE emitida exitosamente (ID: ${data.data.idGre})` })
-      } else {
-        setResultado({ success: false, message: `❌ Error: ${data.message}` })
-      }
-    } catch (error) {
-      setResultado({ success: false, message: `❌ Error de conexión: ${error}` })
-    } finally {
-      setEnviando(false)
-    }
-  }
-
   // Resultado final
   if (resultado) {
     return (
@@ -185,10 +129,10 @@ export default function EmisionGRE() {
           <p className={`text-lg font-extrabold mb-2 ${resultado.success ? "text-green-700" : "text-red-700"}`}>
             {resultado.message}
           </p>
-          {resultado.success && <p className="text-gray-600 text-sm">La Guía de Remisión Electrónica ha sido registrada correctamente en el sistema.</p>}
+          {resultado.success && <p className="text-gray-600 text-sm">La Guía de Remisión Electrónica ha sido registrada correctamente en el sistema y el PDF se ha descargado.</p>}
         </div>
         <div className="flex justify-end mt-6">
-          <button onClick={() => { setResultado(null); setPaso(1); setDestinatarios([]); setDocumentos([]); setBienes([]); setPuntoPartida(null); setPuntoLlegada(null) }} className="bg-[#0063AE] text-white px-8 py-2 font-extrabold text-sm hover:bg-[#004d8a] transition-colors shadow">
+          <button onClick={() => { setResultado(null); setPaso(1); setDestinatarios([]); setDocumentos([]); setBienes([]); setPuntoPartida(null); setPuntoLlegada(null); setTransporteData(null) }} className="bg-[#0063AE] text-white px-8 py-2 font-extrabold text-sm hover:bg-[#004d8a] transition-colors shadow">
             Nueva Emisión
           </button>
         </div>
@@ -206,15 +150,24 @@ export default function EmisionGRE() {
     return <EmisionGREPuntoTraslado onVolver={() => setPaso(3)} onSiguiente={(partida, llegada) => { setPuntoPartida(partida); setPuntoLlegada(llegada); setPaso(5) }} />
   }
   if (paso === 5) {
-    return <EmisionGRETransporte onVolver={() => setPaso(4)} onEmitir={handleEmitirGRE} />
+    return <EmisionGRETransporte onVolver={() => setPaso(4)} onSiguiente={(data) => { setTransporteData(data); setPaso(6) }} />
   }
-
-  // Overlay de enviando
-  if (enviando) {
+  if (paso === 6 && transporteData) {
     return (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-        <div className="bg-white p-8 rounded shadow-xl text-center"><p className="text-black font-extrabold text-lg">Emitiendo GRE...</p><p className="text-gray-500 text-sm mt-2">Por favor espere</p></div>
-      </div>
+      <EmisionGREPreview
+        tipoGuia={tipoGuia}
+        comercioExterior={comercioExterior}
+        motivoTraslado={motivoTraslado}
+        destinatarios={destinatarios}
+        documentos={documentos}
+        bienes={bienes}
+        puntoPartida={puntoPartida}
+        puntoLlegada={puntoLlegada}
+        transporte={transporteData}
+        usuarioInfo={usuarioInfo}
+        onVolver={() => setPaso(5)}
+        onEmitido={(res) => setResultado(res)}
+      />
     )
   }
 
@@ -227,6 +180,7 @@ export default function EmisionGRE() {
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
+        <div className="flex-1 h-1 bg-gray-300 rounded"></div>
       </div>
       <h3 className="text-[#0063AE] font-extrabold text-base mb-4">1. Datos de emisión</h3>
       <p className="text-black font-extrabold text-sm mb-3">Seleccione el tipo de guía de remisión</p>
@@ -235,8 +189,8 @@ export default function EmisionGRE() {
         <button onClick={() => setTipoGuia("transportista")} className={`px-8 py-2 font-extrabold text-sm transition-colors ${tipoGuia === "transportista" ? "bg-[#0063AE] text-white" : "bg-white text-[#0063AE] border-2 border-[#0063AE]"}`}>Transportista</button>
       </div>
       <div className="flex items-center gap-6 mb-6 border-b border-gray-200 pb-4">
-        <div className="flex items-center gap-3"><span className="text-black font-extrabold text-sm">RUC</span><span className="text-gray-600 text-sm">20498697381</span></div>
-        <div className="flex items-center gap-3"><span className="text-black font-extrabold text-sm">Apellidos y nombres, denominación o razón social</span><span className="text-gray-600 text-sm">TRANSPORTES ELIO S.A.C.</span></div>
+        <div className="flex items-center gap-3"><span className="text-black font-extrabold text-sm">RUC</span><span className="text-gray-600 text-sm">{usuarioInfo.ruc}</span></div>
+        <div className="flex items-center gap-3"><span className="text-black font-extrabold text-sm">Apellidos y nombres, denominación o razón social</span><span className="text-gray-600 text-sm">{usuarioInfo.razonSocial}</span></div>
       </div>
       <p className="text-black font-extrabold text-sm mb-2">¿Es una operación de comercio exterior?</p>
       <div className="flex gap-8 mb-6">

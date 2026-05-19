@@ -17,7 +17,7 @@ public class Conductor {
     @Column(name = "numerodocumento", length = 20, nullable = false)
     private String numeroDocumento;
 
-    @Column(name = "tipodocumentoidentidad", length = 20, nullable = false)
+    @Column(name = "tipodocumentoidentidad", length = 100, nullable = false)
     private String tipoDocumentoIdentidad;
 
     @Column(name = "numerolicencia", length = 20, nullable = false)

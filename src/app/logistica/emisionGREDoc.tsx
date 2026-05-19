@@ -117,6 +117,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
+        <div className="flex-1 h-1 bg-gray-300 rounded"></div>
       </div>
 
       {/* Paso 2 */}

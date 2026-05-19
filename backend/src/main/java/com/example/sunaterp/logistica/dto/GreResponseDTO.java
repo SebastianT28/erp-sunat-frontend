@@ -13,6 +13,8 @@ public class GreResponseDTO {
     private LocalDate fechaEmision;
     private String motivoTraslado;
     private String estado;
+    private String serie;
+    private String numero;
 
     // Destinatario
     private String destinatarioNombre;
@@ -48,6 +50,12 @@ public class GreResponseDTO {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getSerie() { return serie; }
+    public void setSerie(String serie) { this.serie = serie; }
+
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
 
     public String getDestinatarioNombre() { return destinatarioNombre; }
     public void setDestinatarioNombre(String destinatarioNombre) { this.destinatarioNombre = destinatarioNombre; }

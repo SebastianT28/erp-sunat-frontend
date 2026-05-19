@@ -39,6 +39,12 @@ public class Gre {
     @Column(name = "estado", length = 50, nullable = false)
     private String estado;
 
+    @Column(name = "serie", length = 10, nullable = false)
+    private String serie;
+
+    @Column(name = "numero", length = 20, nullable = false)
+    private String numero;
+
     @OneToMany(mappedBy = "gre", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleGre> detalles = new ArrayList<>();
 
@@ -89,6 +95,12 @@ public class Gre {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getSerie() { return serie; }
+    public void setSerie(String serie) { this.serie = serie; }
+
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
 
     public List<DetalleGre> getDetalles() { return detalles; }
     public void setDetalles(List<DetalleGre> detalles) { this.detalles = detalles; }
