@@ -3,7 +3,6 @@ package com.example.sunaterp.logistica.controller;
 import com.example.sunaterp.logistica.dto.DireccionDTO;
 import com.example.sunaterp.logistica.entity.Direccion;
 import com.example.sunaterp.logistica.repository.DireccionRepository;
-import com.example.sunaterp.logistica.repository.PuntoTrasladoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +19,6 @@ public class PuntoTrasladoController {
 
     @Autowired
     private DireccionRepository direccionRepository;
-
-    @Autowired
-    private PuntoTrasladoRepository puntoTrasladoRepository;
 
     /**
      * POST /api/logistica/punto-traslado

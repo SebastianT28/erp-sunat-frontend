@@ -181,6 +181,50 @@ public class GreService {
     }
 
     /**
+     * Obtiene una GRE por su serie y numero.
+     */
+    @Transactional(readOnly = true)
+    public GreResponseDTO consultarGrePorSerieYNumero(String serie, String numero) {
+        Gre gre = greRepository.findBySerieAndNumero(serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró una GRE con serie " + serie + " y número " + numero));
+        return convertirAResponseDTO(gre);
+    }
+
+    /**
+     * Obtiene una GRE por su tipo, serie y numero (para la baja).
+     */
+    @Transactional(readOnly = true)
+    public GreResponseDTO consultarGreParaBaja(String tipoGuia, String serie, String numero) {
+        Gre gre = greRepository.findByTipoGuiaAndSerieAndNumero(tipoGuia, serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró una GRE de tipo " + tipoGuia + " con serie " + serie + " y número " + numero));
+        return convertirAResponseDTO(gre);
+    }
+
+    /**
+     * Elimina una GRE por su tipo, serie y numero (Baja).
+     */
+    @Transactional
+    public void eliminarGre(String tipoGuia, String serie, String numero) {
+        Gre gre = greRepository.findByTipoGuiaAndSerieAndNumero(tipoGuia, serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró la GRE para eliminar."));
+        greRepository.delete(gre);
+    }
+
+    /**
+     * Busca GREs para no conformidad.
+     */
+    @Transactional(readOnly = true)
+    public List<GreResponseDTO> buscarGresParaReclamo(String fechaDesde, String fechaHasta, String numeroDocumento) {
+        LocalDate start = LocalDate.parse(fechaDesde);
+        LocalDate end = LocalDate.parse(fechaHasta);
+        List<Gre> gres = greRepository.findByFechaEmisionBetweenAndDestinatarioNumeroDocumento(start, end, numeroDocumento);
+        
+        return gres.stream()
+                .map(this::convertirAResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Convierte una entidad GRE a GreResponseDTO.
      */
     public GreResponseDTO convertirAResponseDTO(Gre gre) {

@@ -19,11 +19,11 @@ public class Gre {
     @JoinColumn(name = "idusuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idtransporte", nullable = false)
     private Transporte transporte;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "iddestinatario", nullable = false)
     private Destinatario destinatario;
 
