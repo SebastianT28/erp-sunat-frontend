@@ -25,7 +25,7 @@ public class DestinatarioController {
     public ResponseEntity<?> buscarPorDocumento(@RequestParam String numeroDocumento) {
         Map<String, Object> result = new HashMap<>();
 
-        Optional<Destinatario> destinatario = destinatarioRepository.findByNumeroDocumento(numeroDocumento);
+        Optional<Destinatario> destinatario = destinatarioRepository.findFirstByNumeroDocumento(numeroDocumento);
 
         if (destinatario.isPresent()) {
             Destinatario d = destinatario.get();

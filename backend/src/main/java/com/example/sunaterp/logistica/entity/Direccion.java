@@ -23,20 +23,57 @@ public class Direccion {
     @Column(name = "direcciondetallada", length = 150, nullable = false)
     private String direccionDetallada;
 
-    public Direccion() {}
+    @Column(name = "frecuente")
+    private Boolean frecuente = false;
 
-    public Integer getIdDireccion() { return idDireccion; }
-    public void setIdDireccion(Integer idDireccion) { this.idDireccion = idDireccion; }
+    public Direccion() {
+    }
 
-    public String getDepartamento() { return departamento; }
-    public void setDepartamento(String departamento) { this.departamento = departamento; }
+    public Integer getIdDireccion() {
+        return idDireccion;
+    }
 
-    public String getProvincia() { return provincia; }
-    public void setProvincia(String provincia) { this.provincia = provincia; }
+    public void setIdDireccion(Integer idDireccion) {
+        this.idDireccion = idDireccion;
+    }
 
-    public String getDistrito() { return distrito; }
-    public void setDistrito(String distrito) { this.distrito = distrito; }
+    public String getDepartamento() {
+        return departamento;
+    }
 
-    public String getDireccionDetallada() { return direccionDetallada; }
-    public void setDireccionDetallada(String direccionDetallada) { this.direccionDetallada = direccionDetallada; }
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
+    }
+
+    public String getDistrito() {
+        return distrito;
+    }
+
+    public void setDistrito(String distrito) {
+        this.distrito = distrito;
+    }
+
+    public String getDireccionDetallada() {
+        return direccionDetallada;
+    }
+
+    public void setDireccionDetallada(String direccionDetallada) {
+        this.direccionDetallada = direccionDetallada;
+    }
+
+    public Boolean getFrecuente() {
+        return frecuente;
+    }
+
+    public void setFrecuente(Boolean frecuente) {
+        this.frecuente = frecuente;
+    }
 }

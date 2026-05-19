@@ -5,18 +5,48 @@ public class DireccionDTO {
     private String provincia;
     private String distrito;
     private String direccionDetallada;
+    private Boolean frecuente;
 
-    public DireccionDTO() {}
+    public DireccionDTO() {
+    }
 
-    public String getDepartamento() { return departamento; }
-    public void setDepartamento(String departamento) { this.departamento = departamento; }
+    public String getDepartamento() {
+        return departamento;
+    }
 
-    public String getProvincia() { return provincia; }
-    public void setProvincia(String provincia) { this.provincia = provincia; }
+    public void setDepartamento(String departamento) {
+        this.departamento = departamento;
+    }
 
-    public String getDistrito() { return distrito; }
-    public void setDistrito(String distrito) { this.distrito = distrito; }
+    public String getProvincia() {
+        return provincia;
+    }
 
-    public String getDireccionDetallada() { return direccionDetallada; }
-    public void setDireccionDetallada(String direccionDetallada) { this.direccionDetallada = direccionDetallada; }
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
+    }
+
+    public String getDistrito() {
+        return distrito;
+    }
+
+    public void setDistrito(String distrito) {
+        this.distrito = distrito;
+    }
+
+    public String getDireccionDetallada() {
+        return direccionDetallada;
+    }
+
+    public void setDireccionDetallada(String direccionDetallada) {
+        this.direccionDetallada = direccionDetallada;
+    }
+
+    public Boolean getFrecuente() {
+        return frecuente;
+    }
+
+    public void setFrecuente(Boolean frecuente) {
+        this.frecuente = frecuente;
+    }
 }

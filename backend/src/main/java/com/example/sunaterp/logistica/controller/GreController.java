@@ -121,4 +121,92 @@ public class GreController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
+
+    /**
+     * GET /api/logistica/gre/buscar?serie=XXX&numero=YYY
+     * Busca una GRE por su serie y número.
+     */
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarGre(@RequestParam String serie, @RequestParam String numero) {
+        try {
+            GreResponseDTO response = greService.consultarGrePorSerieYNumero(serie, numero);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("data", response);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+    }
+
+    /**
+     * GET /api/logistica/gre/buscar-baja
+     * Busca una GRE específicamente para dar de baja, validando el tipo de guía.
+     */
+    @GetMapping("/buscar-baja")
+    public ResponseEntity<?> buscarGreParaBaja(
+            @RequestParam String tipoGuia,
+            @RequestParam String serie,
+            @RequestParam String numero) {
+        try {
+            GreResponseDTO response = greService.consultarGreParaBaja(tipoGuia, serie, numero);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("data", response);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+    }
+
+    /**
+     * DELETE /api/logistica/gre/baja
+     * Elimina una GRE de la base de datos (Dar de baja).
+     */
+    @DeleteMapping("/baja")
+    public ResponseEntity<?> darDeBajaGre(
+            @RequestParam String tipoGuia,
+            @RequestParam String serie,
+            @RequestParam String numero) {
+        try {
+            greService.eliminarGre(tipoGuia, serie, numero);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("message", "GRE eliminada exitosamente.");
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Error al dar de baja: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    /**
+     * GET /api/logistica/gre/pendientes-reclamo
+     */
+    @GetMapping("/pendientes-reclamo")
+    public ResponseEntity<?> listarGresParaReclamo(
+            @RequestParam String fechaDesde,
+            @RequestParam String fechaHasta,
+            @RequestParam String numeroDocumento) {
+        try {
+            List<GreResponseDTO> response = greService.buscarGresParaReclamo(fechaDesde, fechaHasta, numeroDocumento);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("data", response);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Error al buscar GREs: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
 }

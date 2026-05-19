@@ -14,11 +14,11 @@ public class Destinatario {
     @Column(name = "nombre", length = 100, nullable = false)
     private String nombre;
 
-    @Column(name = "tipodocumentoidentidad", length = 20, nullable = false)
-    private String tipoDocumentoIdentidad;
-
     @Column(name = "numerodocumento", length = 20, nullable = false)
     private String numeroDocumento;
+
+    @Column(name = "tipodocumentoidentidad", length = 100, nullable = false)
+    private String tipoDocumentoIdentidad;
 
     public Destinatario() {}
 
