@@ -19,11 +19,11 @@ public class Gre {
     @JoinColumn(name = "idusuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "idtransporte", nullable = false)
     private Transporte transporte;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "iddestinatario", nullable = false)
     private Destinatario destinatario;
 
@@ -38,6 +38,12 @@ public class Gre {
 
     @Column(name = "estado", length = 50, nullable = false)
     private String estado;
+
+    @Column(name = "serie", length = 10, nullable = false)
+    private String serie;
+
+    @Column(name = "numero", length = 20, nullable = false)
+    private String numero;
 
     @OneToMany(mappedBy = "gre", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleGre> detalles = new ArrayList<>();
@@ -89,6 +95,12 @@ public class Gre {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getSerie() { return serie; }
+    public void setSerie(String serie) { this.serie = serie; }
+
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
 
     public List<DetalleGre> getDetalles() { return detalles; }
     public void setDetalles(List<DetalleGre> detalles) { this.detalles = detalles; }

@@ -8,6 +8,16 @@ const tiposDocumentoRelacionado = [
   "Guia de remision remitente",
 ]
 
+// Tipos que requieren validación contra el backend
+const tiposConValidacion = ["Factura", "Boleta de venta", "Guia de remision remitente"]
+
+// Etiquetas amigables para cada tipo de documento
+const etiquetasTipo: Record<string, string> = {
+  "Factura": "Factura",
+  "Boleta de venta": "Boleta de venta",
+  "Guia de remision remitente": "Guía de remisión remitente",
+}
+
 interface DocumentoRelacionado {
   tipo: string
   ruc: string
@@ -31,37 +41,40 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
   const [modalNumero, setModalNumero] = useState("")
 
   const [buscando, setBuscando] = useState(false)
-  const [encontradoFactura, setEncontradoFactura] = useState(false)
+  const [documentoValidado, setDocumentoValidado] = useState(false)
   const [mensajeBusqueda, setMensajeBusqueda] = useState("")
 
-  const puedeAgregar = modalTipo !== "" && modalSerie.trim() !== "" && modalNumero.trim() !== "" && (modalTipo !== "Factura" || encontradoFactura)
+  const requiereValidacion = tiposConValidacion.includes(modalTipo)
+  const puedeAgregar = modalTipo !== "" && modalSerie.trim() !== "" && modalNumero.trim() !== "" && (!requiereValidacion || documentoValidado)
 
-  const validarFactura = async () => {
-    if (modalSerie.trim() === "" || modalNumero.trim() === "") return
+  const validarDocumento = async () => {
+    if (modalSerie.trim() === "" || modalNumero.trim() === "" || modalTipo === "") return
     setBuscando(true)
     setMensajeBusqueda("")
-    setEncontradoFactura(false)
+    setDocumentoValidado(false)
     try {
-      const res = await fetch(`http://localhost:8080/api/logistica/factura/validar?serie=${modalSerie.trim()}&numero=${modalNumero.trim()}`)
+      const res = await fetch(
+        `http://localhost:8080/api/logistica/documento-relacionado/validar?tipo=${encodeURIComponent(modalTipo)}&serie=${encodeURIComponent(modalSerie.trim())}&numero=${encodeURIComponent(modalNumero.trim())}`
+      )
       const data = await res.json()
       if (data.success && data.existe) {
-        setEncontradoFactura(true)
-        setMensajeBusqueda("✅ Factura validada correctamente")
+        setDocumentoValidado(true)
+        setMensajeBusqueda(`✅ ${etiquetasTipo[modalTipo] || modalTipo} validada correctamente`)
       } else {
-        setEncontradoFactura(false)
-        setMensajeBusqueda("❌ La factura no existe en la base de datos")
+        setDocumentoValidado(false)
+        setMensajeBusqueda(`❌ ${etiquetasTipo[modalTipo] || modalTipo} no existe en la base de datos`)
       }
     } catch (error) {
-      setEncontradoFactura(false)
+      setDocumentoValidado(false)
       setMensajeBusqueda("❌ Error de conexión al validar")
     } finally {
       setBuscando(false)
     }
   }
 
-  const handleTipoChange = (val: string) => { setModalTipo(val); setEncontradoFactura(false); setMensajeBusqueda("") }
-  const handleSerieChange = (val: string) => { setModalSerie(val); setEncontradoFactura(false); setMensajeBusqueda("") }
-  const handleNumeroChange = (val: string) => { setModalNumero(val); setEncontradoFactura(false); setMensajeBusqueda("") }
+  const handleTipoChange = (val: string) => { setModalTipo(val); setDocumentoValidado(false); setMensajeBusqueda("") }
+  const handleSerieChange = (val: string) => { setModalSerie(val); setDocumentoValidado(false); setMensajeBusqueda("") }
+  const handleNumeroChange = (val: string) => { setModalNumero(val); setDocumentoValidado(false); setMensajeBusqueda("") }
 
   const handleAgregar = () => {
     if (!puedeAgregar) return
@@ -74,6 +87,8 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
     setModalTipo("")
     setModalSerie("")
     setModalNumero("")
+    setDocumentoValidado(false)
+    setMensajeBusqueda("")
     setModalAbierto(false)
   }
 
@@ -82,7 +97,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
     setModalTipo("")
     setModalSerie("")
     setModalNumero("")
-    setEncontradoFactura(false)
+    setDocumentoValidado(false)
     setMensajeBusqueda("")
   }
 
@@ -99,6 +114,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
       <div className="flex gap-1 mb-6">
         <div className="flex-1 h-1 bg-[#002f6c] rounded"></div> {/* Paso 1 completado */}
         <div className="flex-1 h-1 bg-[#3399ff] rounded"></div> {/* Paso 2 activo */}
+        <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
         <div className="flex-1 h-1 bg-gray-300 rounded"></div>
@@ -242,12 +258,13 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
                 </div>
               </div>
 
-              {modalTipo === "Factura" && (
+              {/* Botón de validación — aparece para Factura, Boleta de venta y Guía de remisión remitente */}
+              {requiereValidacion && (
                  <div className="mb-6 flex items-center gap-4">
-                    <button onClick={validarFactura} disabled={buscando || modalSerie.trim() === "" || modalNumero.trim() === ""} className="bg-[#3399ff] text-white px-6 py-2 font-extrabold text-xs shadow hover:bg-[#007bff] transition-colors disabled:bg-gray-400">
-                      {buscando ? "Validando..." : "Validar Factura"}
+                    <button onClick={validarDocumento} disabled={buscando || modalSerie.trim() === "" || modalNumero.trim() === ""} className="bg-[#3399ff] text-white px-6 py-2 font-extrabold text-xs shadow hover:bg-[#007bff] transition-colors disabled:bg-gray-400">
+                      {buscando ? "Validando..." : `Validar ${etiquetasTipo[modalTipo] || modalTipo}`}
                     </button>
-                    {mensajeBusqueda && <span className={`text-sm font-bold ${encontradoFactura ? 'text-green-600' : 'text-red-500'}`}>{mensajeBusqueda}</span>}
+                    {mensajeBusqueda && <span className={`text-sm font-bold ${documentoValidado ? 'text-green-600' : 'text-red-500'}`}>{mensajeBusqueda}</span>}
                  </div>
               )}
 

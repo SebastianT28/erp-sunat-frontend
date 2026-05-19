@@ -55,8 +55,10 @@ export default function Login() {
       }
 
       if (data.rol?.toLowerCase() === "administrador") {
+        localStorage.setItem("user", JSON.stringify(data))
         router.push("/gerenciaGeneral")
       } else {
+        localStorage.setItem("user", JSON.stringify(data))
         router.push("/dashboard")
       }
 

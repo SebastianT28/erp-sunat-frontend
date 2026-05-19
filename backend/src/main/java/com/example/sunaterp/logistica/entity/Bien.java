@@ -24,6 +24,12 @@ public class Bien {
     @Column(name = "peso", precision = 10, scale = 2)
     private BigDecimal peso;
 
+    @Column(name = "cantidad")
+    private Integer cantidad;
+
+    @Column(name = "normalizado")
+    private Boolean normalizado;
+
     public Bien() {}
 
     public Integer getIdBien() { return idBien; }
@@ -40,4 +46,10 @@ public class Bien {
 
     public BigDecimal getPeso() { return peso; }
     public void setPeso(BigDecimal peso) { this.peso = peso; }
+
+    public Integer getCantidad() { return cantidad; }
+    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+
+    public Boolean getNormalizado() { return normalizado; }
+    public void setNormalizado(Boolean normalizado) { this.normalizado = normalizado; }
 }

@@ -22,6 +22,18 @@ public class GreService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private DestinatarioRepository destinatarioRepository;
+
+    @Autowired
+    private VehiculoRepository vehiculoRepository;
+
+    @Autowired
+    private ConductorRepository conductorRepository;
+
+    @Autowired
+    private BienRepository bienRepository;
+
     /**
      * Emite una nueva GRE con todos los datos de los 5 pasos.
      */
@@ -32,24 +44,39 @@ public class GreService {
         Usuario usuario = usuarioRepository.findById(dto.getIdUsuario())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getIdUsuario()));
 
-        // 2. Crear Destinatario
-        Destinatario destinatario = new Destinatario();
-        destinatario.setNombre(dto.getDestinatario().getNombre());
-        destinatario.setTipoDocumentoIdentidad(dto.getDestinatario().getTipoDocumentoIdentidad());
-        destinatario.setNumeroDocumento(dto.getDestinatario().getNumeroDocumento());
+        // 2. Obtener o Crear Destinatario
+        Destinatario destinatario = destinatarioRepository
+                .findFirstByNumeroDocumento(dto.getDestinatario().getNumeroDocumento())
+                .orElseGet(() -> {
+                    Destinatario nuevo = new Destinatario();
+                    nuevo.setNombre(dto.getDestinatario().getNombre());
+                    nuevo.setTipoDocumentoIdentidad(dto.getDestinatario().getTipoDocumentoIdentidad());
+                    nuevo.setNumeroDocumento(dto.getDestinatario().getNumeroDocumento());
+                    return nuevo;
+                });
 
-        // 3. Crear Vehículo
-        Vehiculo vehiculo = new Vehiculo();
-        vehiculo.setPlaca(dto.getTransporte().getVehiculo().getPlaca());
-        vehiculo.setEntidadEmisora(dto.getTransporte().getVehiculo().getEntidadEmisora());
-        vehiculo.setNumeroAutorizacion(dto.getTransporte().getVehiculo().getNumeroAutorizacion());
+        // 3. Obtener o Crear Vehículo
+        Vehiculo vehiculo = vehiculoRepository
+                .findFirstByPlaca(dto.getTransporte().getVehiculo().getPlaca())
+                .orElseGet(() -> {
+                    Vehiculo nuevo = new Vehiculo();
+                    nuevo.setPlaca(dto.getTransporte().getVehiculo().getPlaca());
+                    nuevo.setEntidadEmisora(dto.getTransporte().getVehiculo().getEntidadEmisora());
+                    nuevo.setNumeroAutorizacion(dto.getTransporte().getVehiculo().getNumeroAutorizacion());
+                    return nuevo;
+                });
 
-        // 4. Crear Conductor
-        Conductor conductor = new Conductor();
-        conductor.setNombre(dto.getTransporte().getConductor().getNombre());
-        conductor.setTipoDocumentoIdentidad(dto.getTransporte().getConductor().getTipoDocumentoIdentidad());
-        conductor.setNumeroDocumento(dto.getTransporte().getConductor().getNumeroDocumento());
-        conductor.setNumeroLicencia(dto.getTransporte().getConductor().getNumeroLicencia());
+        // 4. Obtener o Crear Conductor
+        Conductor conductor = conductorRepository
+                .findFirstByNumeroDocumento(dto.getTransporte().getConductor().getNumeroDocumento())
+                .orElseGet(() -> {
+                    Conductor nuevo = new Conductor();
+                    nuevo.setNombre(dto.getTransporte().getConductor().getNombre());
+                    nuevo.setTipoDocumentoIdentidad(dto.getTransporte().getConductor().getTipoDocumentoIdentidad());
+                    nuevo.setNumeroDocumento(dto.getTransporte().getConductor().getNumeroDocumento());
+                    nuevo.setNumeroLicencia(dto.getTransporte().getConductor().getNumeroLicencia());
+                    return nuevo;
+                });
 
         // 5. Crear Transporte
         Transporte transporte = new Transporte();
@@ -68,14 +95,27 @@ public class GreService {
         gre.setMotivoTraslado(dto.getMotivoTraslado());
         gre.setEstado("Emitido");
 
+        // Generar Serie y Número
+        String serieDefecto = "T001";
+        String maxNumero = greRepository.findMaxNumeroBySerie(serieDefecto);
+        int nextNum = (maxNumero != null && !maxNumero.isEmpty()) ? Integer.parseInt(maxNumero) + 1 : 1;
+        gre.setSerie(serieDefecto);
+        gre.setNumero(String.format("%06d", nextNum));
+
         // 7. Agregar Bienes (Detalle GRE)
         if (dto.getBienes() != null) {
             for (BienDTO bienDTO : dto.getBienes()) {
-                Bien bien = new Bien();
-                bien.setCodigoBien(bienDTO.getCodigoBien());
-                bien.setDescripcion(bienDTO.getDescripcion());
-                bien.setUnidadMedida(bienDTO.getUnidadMedida());
-                bien.setPeso(bienDTO.getPeso());
+                Bien bien = bienRepository
+                        .findFirstByCodigoBien(bienDTO.getCodigoBien())
+                        .orElseGet(() -> {
+                            Bien nuevo = new Bien();
+                            nuevo.setCodigoBien(bienDTO.getCodigoBien());
+                            nuevo.setDescripcion(bienDTO.getDescripcion());
+                            nuevo.setUnidadMedida(bienDTO.getUnidadMedida());
+                            nuevo.setPeso(bienDTO.getPeso());
+                            nuevo.setNormalizado(bienDTO.getNormalizado() != null ? bienDTO.getNormalizado() : false);
+                            return nuevo;
+                        });
 
                 DetalleGre detalle = new DetalleGre();
                 detalle.setBien(bien);
@@ -141,6 +181,50 @@ public class GreService {
     }
 
     /**
+     * Obtiene una GRE por su serie y numero.
+     */
+    @Transactional(readOnly = true)
+    public GreResponseDTO consultarGrePorSerieYNumero(String serie, String numero) {
+        Gre gre = greRepository.findBySerieAndNumero(serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró una GRE con serie " + serie + " y número " + numero));
+        return convertirAResponseDTO(gre);
+    }
+
+    /**
+     * Obtiene una GRE por su tipo, serie y numero (para la baja).
+     */
+    @Transactional(readOnly = true)
+    public GreResponseDTO consultarGreParaBaja(String tipoGuia, String serie, String numero) {
+        Gre gre = greRepository.findByTipoGuiaAndSerieAndNumero(tipoGuia, serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró una GRE de tipo " + tipoGuia + " con serie " + serie + " y número " + numero));
+        return convertirAResponseDTO(gre);
+    }
+
+    /**
+     * Elimina una GRE por su tipo, serie y numero (Baja).
+     */
+    @Transactional
+    public void eliminarGre(String tipoGuia, String serie, String numero) {
+        Gre gre = greRepository.findByTipoGuiaAndSerieAndNumero(tipoGuia, serie, numero)
+                .orElseThrow(() -> new RuntimeException("No se encontró la GRE para eliminar."));
+        greRepository.delete(gre);
+    }
+
+    /**
+     * Busca GREs para no conformidad.
+     */
+    @Transactional(readOnly = true)
+    public List<GreResponseDTO> buscarGresParaReclamo(String fechaDesde, String fechaHasta, String numeroDocumento) {
+        LocalDate start = LocalDate.parse(fechaDesde);
+        LocalDate end = LocalDate.parse(fechaHasta);
+        List<Gre> gres = greRepository.findByFechaEmisionBetweenAndDestinatarioNumeroDocumento(start, end, numeroDocumento);
+        
+        return gres.stream()
+                .map(this::convertirAResponseDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    /**
      * Convierte una entidad GRE a GreResponseDTO.
      */
     public GreResponseDTO convertirAResponseDTO(Gre gre) {
@@ -150,6 +234,8 @@ public class GreService {
         response.setFechaEmision(gre.getFechaEmision());
         response.setMotivoTraslado(gre.getMotivoTraslado());
         response.setEstado(gre.getEstado());
+        response.setSerie(gre.getSerie());
+        response.setNumero(gre.getNumero());
 
         // Destinatario
         if (gre.getDestinatario() != null) {
