@@ -9,13 +9,11 @@ import com.example.sunaterp.logistica.entity.Gre;
 import com.example.sunaterp.logistica.entity.Notificacion;
 import com.example.sunaterp.logistica.repository.GreRepository;
 import com.example.sunaterp.logistica.repository.NotificacionRepository;
-import com.example.sunaterp.produccion.entity.FormularioGeneral;
 import com.example.sunaterp.produccion.repository.FormularioGeneralRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,7 +60,7 @@ public class GerenciaGeneralService {
     public UsuarioGerenciaDTO createUsuario(UsuarioCreateDTO dto) {
         Optional<Contribuyente> cOpt = contribuyenteRepository.findById(dto.getRuc());
         Contribuyente contribuyente;
-        
+
         if (cOpt.isPresent()) {
             contribuyente = cOpt.get();
         } else {
@@ -80,7 +78,7 @@ public class GerenciaGeneralService {
         usuario.setCorreo(dto.getCorreo() != null ? dto.getCorreo() : "sin_correo@empresa.com");
         usuario.setRol("contribuyente");
         usuario.setContribuyente(contribuyente);
-        
+
         usuarioRepository.save(usuario);
 
         UsuarioGerenciaDTO response = new UsuarioGerenciaDTO();
@@ -101,8 +99,9 @@ public class GerenciaGeneralService {
                 usuario.setContrasena(dto.getPassword());
             }
             usuario.setCorreo(dto.getCorreo() != null ? dto.getCorreo() : "sin_correo@empresa.com");
-            
-            if (dto.getRuc() != null && (usuario.getContribuyente() == null || !dto.getRuc().equals(usuario.getContribuyente().getRuc()))) {
+
+            if (dto.getRuc() != null && (usuario.getContribuyente() == null
+                    || !dto.getRuc().equals(usuario.getContribuyente().getRuc()))) {
                 Optional<Contribuyente> cOpt = contribuyenteRepository.findById(dto.getRuc());
                 if (cOpt.isPresent()) {
                     usuario.setContribuyente(cOpt.get());
@@ -150,8 +149,8 @@ public class GerenciaGeneralService {
 
             // check if there's any reclamo for this gre
             Optional<Notificacion> reclamo = notificaciones.stream()
-                .filter(n -> n.getGre() != null && n.getGre().getIdGre().equals(g.getIdGre()))
-                .findFirst();
+                    .filter(n -> n.getGre() != null && n.getGre().getIdGre().equals(g.getIdGre()))
+                    .findFirst();
             if (reclamo.isPresent()) {
                 dto.setReclamo(reclamo.get().getMensaje());
             }
@@ -172,7 +171,7 @@ public class GerenciaGeneralService {
                 gre.setEstado(dto.getEstado());
             }
             greRepository.save(gre);
-            
+
             GreGerenciaDTO response = new GreGerenciaDTO();
             response.setId(gre.getIdGre());
             response.setSerie(gre.getSerie());
@@ -191,9 +190,12 @@ public class GerenciaGeneralService {
         return formularioRepository.findAll().stream().map(f -> {
             DeclaracionGerenciaDTO dto = new DeclaracionGerenciaDTO();
             dto.setId(f.getId());
-            dto.setPeriodo(f.getPeriodoTributario() != null ? f.getPeriodoTributario().format(DateTimeFormatter.ofPattern("yyyy-MM")) : "");
+            dto.setPeriodo(f.getPeriodoTributario() != null
+                    ? f.getPeriodoTributario().format(DateTimeFormatter.ofPattern("yyyy-MM"))
+                    : "");
             dto.setFormulario(f.getTipoDeclaracion() != null ? f.getTipoDeclaracion() : "Declaración");
-            dto.setEmisor("-"); // FormularioGeneral doesn't link directly to user in current DB schema, we return empty or default
+            dto.setEmisor("-"); // FormularioGeneral doesn't link directly to user in current DB schema, we
+                                // return empty or default
             dto.setFecha(f.getFechaModificacion() != null ? f.getFechaModificacion().toString() : "");
             return dto;
         }).collect(Collectors.toList());

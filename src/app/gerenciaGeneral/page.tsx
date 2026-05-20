@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { API_BASE_URL } from "../../config/api"
 
 import ContribuyentesPanel from "./contribuyentes/ContribuyentesPanel"
 import GrePanel from "./gre/GrePanel"
@@ -20,7 +21,7 @@ export default function GerenciaGeneral() {
 
     useEffect(() => {
         // Fetch dashboard metrics
-        fetch("http://localhost:8080/api/gerencia/dashboard")
+        fetch(`${API_BASE_URL}/api/gerencia/dashboard`)
             .then(res => res.json())
             .then(data => setDashboardData(data))
             .catch(err => console.error("Error al cargar el dashboard:", err))

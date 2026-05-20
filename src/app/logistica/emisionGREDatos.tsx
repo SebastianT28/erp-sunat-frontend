@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { API_BASE_URL } from "../../config/api"
 import EmisionGREDoc from "./emisionGREDoc"
 import EmisionGREBienes from "./emisionGREBienes"
 import type { Bien } from "./emisionGREBienes"
@@ -10,7 +11,7 @@ import EmisionGRETransporte from "./emisionGRETransporte"
 import EmisionGREPreview from "./emisionGREPreview"
 import type { DatosTransporte } from "./emisionGREPreview"
 
-const API_URL = "http://localhost:8080/api/logistica/gre"
+const API_URL = `${API_BASE_URL}/api/logistica/gre`
 
 const motivosNacional = [
   "Venta","Compra","Venta con entrega a terceros",

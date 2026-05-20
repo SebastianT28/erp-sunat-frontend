@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { API_BASE_URL } from "../../../config/api"
 
 export default function DeclaracionesPanel() {
     const [declaraciones, setDeclaraciones] = useState<any[]>([])
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/gerencia/declaraciones")
+        fetch(`${API_BASE_URL}/api/gerencia/declaraciones`)
             .then(res => res.json())
             .then(data => setDeclaraciones(data))
             .catch(err => console.error(err))
@@ -22,7 +23,7 @@ export default function DeclaracionesPanel() {
 
     const executeDelete = () => {
         if (declaracionToDelete === null) return
-        fetch(`http://localhost:8080/api/gerencia/declaraciones/${declaracionToDelete}`, { method: "DELETE" })
+        fetch(`${API_BASE_URL}/api/gerencia/declaraciones/${declaracionToDelete}`, { method: "DELETE" })
             .then(() => {
                 setDeclaraciones(declaraciones.filter(d => d.id !== declaracionToDelete))
                 setIsDeleteModalOpen(false)

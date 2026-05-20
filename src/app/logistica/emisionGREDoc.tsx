@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { API_BASE_URL } from "../../config/api"
 
 const tiposDocumentoRelacionado = [
   "Factura",
@@ -54,7 +55,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
     setDocumentoValidado(false)
     try {
       const res = await fetch(
-        `http://localhost:8080/api/logistica/documento-relacionado/validar?tipo=${encodeURIComponent(modalTipo)}&serie=${encodeURIComponent(modalSerie.trim())}&numero=${encodeURIComponent(modalNumero.trim())}`
+        `${API_BASE_URL}/api/logistica/documento-relacionado/validar?tipo=${encodeURIComponent(modalTipo)}&serie=${encodeURIComponent(modalSerie.trim())}&numero=${encodeURIComponent(modalNumero.trim())}`
       )
       const data = await res.json()
       if (data.success && data.existe) {

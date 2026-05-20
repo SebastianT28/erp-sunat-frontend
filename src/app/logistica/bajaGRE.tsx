@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { API_BASE_URL } from "../../config/api"
 
 export default function BajaGRE() {
     const [tipoGRE, setTipoGRE] = useState("")
@@ -34,7 +35,7 @@ export default function BajaGRE() {
 
         try {
             const numFormat = numero.padStart(6, '0')
-            const url = `http://localhost:8080/api/logistica/gre/buscar-baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${serie.toUpperCase()}&numero=${numFormat}`
+            const url = `${API_BASE_URL}/api/logistica/gre/buscar-baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${serie.toUpperCase()}&numero=${numFormat}`
             const res = await fetch(url)
             const data = await res.json()
 
@@ -70,7 +71,7 @@ export default function BajaGRE() {
     const ejecutarBaja = async () => {
         setMostrarModalConfirmacion(false)
         try {
-            const url = `http://localhost:8080/api/logistica/gre/baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${greEncontrada.serie}&numero=${greEncontrada.numero}`
+            const url = `${API_BASE_URL}/api/logistica/gre/baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${greEncontrada.serie}&numero=${greEncontrada.numero}`
             const res = await fetch(url, { method: "DELETE" })
             const data = await res.json()
             

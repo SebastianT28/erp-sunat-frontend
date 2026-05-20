@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { FormData } from "./page";
 import Link from "next/link";
+import { API_BASE_URL } from "../../config/api";
 
 interface Props {
   formData: FormData;
@@ -23,7 +24,7 @@ export default function Seccion4({ formData, updateFormData, prevStep }: Props) 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/marketing/inscripcion/guardar", {
+      const response = await fetch(`${API_BASE_URL}/api/marketing/inscripcion/guardar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
