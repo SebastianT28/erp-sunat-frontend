@@ -23,26 +23,20 @@ export default function Seccion4({ formData, updateFormData, prevStep }: Props) 
     setIsSubmitting(true);
 
     try {
-      // Simulación de petición fetch real al backend (Spring Boot)
-      // const response = await fetch("http://localhost:8080/api/auth/register", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     ...formData,
-      //     role: "CONTRIBUYENTE"
-      //   }),
-      // });
+      const response = await fetch("http://localhost:8080/api/marketing/inscripcion/guardar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      // if (!response.ok) throw new Error("Error en el registro");
+      if (!response.ok) {
+        throw new Error("Error en el registro");
+      }
 
-      // Simular retraso de red de 1.5s
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Generar RUC dinámicamente según especificación (10 + DNI)
-      // Nota: un RUC real en Perú para persona natural es 10 + DNI + 1 dígito validador. 
-      // Por practicidad generaremos 10 + DNI + 1
-      const ruc = `10${formData.dni}1`;
-      setGeneratedRuc(ruc);
+      const data = await response.json();
+      
+      // Procesar respuesta real del backend
+      setGeneratedRuc(data.contribuyente?.ruc);
       setSuccess(true);
     } catch (error) {
       console.error(error);
@@ -161,8 +155,8 @@ export default function Seccion4({ formData, updateFormData, prevStep }: Props) 
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:outline-none transition-all shadow-sm text-slate-900 placeholder-slate-400 bg-white ${confirmPassword && formData.claveSol !== confirmPassword
-                    ? 'border-red-400 focus:ring-red-200'
-                    : 'border-gray-300 focus:ring-[#0071BC] focus:border-[#0071BC]'
+                  ? 'border-red-400 focus:ring-red-200'
+                  : 'border-gray-300 focus:ring-[#0071BC] focus:border-[#0071BC]'
                   }`}
               />
             </div>
