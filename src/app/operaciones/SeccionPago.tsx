@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
+import { API_BASE_URL } from '../../config/api';
 
 export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () => void, datos: any }) {
   const [estadoPago, setEstadoPago] = useState<'CARGANDO' | 'PENDIENTE' | 'PAGADO'>('CARGANDO');
@@ -48,7 +49,7 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
             fechaVencimiento: fechaVenc
           };
 
-          const response = await fetch(`http://localhost:8080/api/produccion/formularios/${datos.idBaseDatos}/pago`, {
+          const response = await fetch(`${API_BASE_URL}/api/produccion/formularios/${datos.idBaseDatos}/pago`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -75,7 +76,7 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
 
   const simularPago = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/produccion/pagos/${numeroOrden}/pagar`, {
+      const response = await fetch(`${API_BASE_URL}/api/produccion/pagos/${numeroOrden}/pagar`, {
         method: "PATCH"
       });
       if (response.ok) {

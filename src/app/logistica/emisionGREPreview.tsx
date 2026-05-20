@@ -3,6 +3,7 @@
 import { useState } from "react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { API_BASE_URL } from "../../config/api"
 import type { Bien } from "./emisionGREBienes"
 import type { Direccion } from "./emisionGREPuntoTraslado"
 import type { Vehiculo, Conductor } from "./emisionGRETransporte"
@@ -38,7 +39,7 @@ interface EmisionGREPreviewProps {
     onEmitido: (resultado: { success: boolean; message: string }) => void
 }
 
-const API_URL = "http://localhost:8080/api/logistica/gre"
+const API_URL = `${API_BASE_URL}/api/logistica/gre`
 
 function formatFecha(fecha: string): string {
     if (!fecha) return "-"

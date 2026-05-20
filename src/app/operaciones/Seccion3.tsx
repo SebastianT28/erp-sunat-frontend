@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from "next/link";
+import { API_BASE_URL } from '../../config/api';
 
 export default function Seccion3({ alAnterior, alPago, datos, actualizarDatos }: { alAnterior: () => void, alPago: () => void, datos: any, actualizarDatos: (d: any) => void }) {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -75,7 +76,7 @@ export default function Seccion3({ alAnterior, alPago, datos, actualizarDatos }:
     console.log("JSON ENVIADO AL BACKEND:", JSON.stringify(datos, null, 2));
     
     try {
-      const response = await fetch("http://localhost:8080/api/produccion/formularios", {
+      const response = await fetch(`${API_BASE_URL}/api/produccion/formularios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

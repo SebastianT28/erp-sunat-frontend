@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
+import { API_BASE_URL } from "../../config/api"
 
 export default function ConsultaGRE() {
     const [tipoGRE, setTipoGRE] = useState<"GRE - Remitente" | "GRE - Transportista">("GRE - Remitente")
@@ -40,7 +41,7 @@ export default function ConsultaGRE() {
         
         try {
             const numFormateado = numero.padStart(6, '0')
-            const res = await fetch(`http://localhost:8080/api/logistica/gre/buscar?serie=${serie.toUpperCase()}&numero=${numFormateado}`)
+            const res = await fetch(`${API_BASE_URL}/api/logistica/gre/buscar?serie=${serie.toUpperCase()}&numero=${numFormateado}`)
             const data = await res.json()
 
             if (data.success && data.data) {

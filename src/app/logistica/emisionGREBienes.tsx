@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { API_BASE_URL } from "../../config/api"
 
-const API_URL = "http://localhost:8080/api/logistica/bien"
+const API_URL = `${API_BASE_URL}/api/logistica/bien`
 
 const unidadesMedida = ["Kilogramos", "Toneladas", "Litros", "Galones", "Cajas", "Unidades"]
 const unidadesMedidaPesoBruto = ["Kilogramos", "Toneladas"]

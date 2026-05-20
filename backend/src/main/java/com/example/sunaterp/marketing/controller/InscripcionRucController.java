@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/marketing")
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class InscripcionRucController {
 
     @Autowired

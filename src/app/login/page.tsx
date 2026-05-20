@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { API_BASE_URL } from "../../config/api"
 
 export default function Login() {
   const router = useRouter()
@@ -26,7 +27,7 @@ export default function Login() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/api/login/usuarios/auth", {
+      const res = await fetch(`${API_BASE_URL}/api/login/usuarios/auth`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { API_BASE_URL } from "../../config/api"
 
-const API_URL = "http://localhost:8080/api/logistica/punto-traslado"
+const API_URL = `${API_BASE_URL}/api/logistica/punto-traslado`
 
 const ubigeoPeru: Record<string, Record<string, string[]>> = {
     "Lima": {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { API_BASE_URL } from "../../config/api"
 
 export default function NoConformidadGRE() {
     const [fechaDesde, setFechaDesde] = useState("")
@@ -59,7 +60,7 @@ export default function NoConformidadGRE() {
         setHaBuscado(true)
 
         try {
-            const url = `http://localhost:8080/api/logistica/gre/pendientes-reclamo?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}&numeroDocumento=${numeroDocumento}`
+            const url = `${API_BASE_URL}/api/logistica/gre/pendientes-reclamo?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}&numeroDocumento=${numeroDocumento}`
             const res = await fetch(url)
             const data = await res.json()
 
@@ -93,7 +94,7 @@ export default function NoConformidadGRE() {
                 motivo: motivoReclamo
             }
 
-            const res = await fetch("http://localhost:8080/api/logistica/notificacion/reclamo", {
+            const res = await fetch(`${API_BASE_URL}/api/logistica/notificacion/reclamo`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
