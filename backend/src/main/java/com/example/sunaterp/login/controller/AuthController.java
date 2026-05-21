@@ -1,13 +1,12 @@
 package com.example.sunaterp.login.controller;
 
+import com.example.sunaterp.config.EmailService;
 import com.example.sunaterp.login.entity.Usuario;
 import com.example.sunaterp.login.repository.UsuarioRepository;
 import com.example.sunaterp.marketing.entity.CodigoVerificacion;
 import com.example.sunaterp.marketing.repository.CodigoVerificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -28,7 +27,7 @@ public class AuthController {
     private CodigoVerificacionRepository codigoVerificacionRepository;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private EmailService emailService;
 
     private static final Pattern XSS_PATTERN = Pattern.compile("<script>|<html>|<body>|<iframe>",
             Pattern.CASE_INSENSITIVE);
@@ -57,12 +56,12 @@ public class AuthController {
 
             Usuario usuario = usuarioOpt.get();
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(correo);
-            message.setSubject("Recuperación de Usuario - SUNAT ERP");
-            message.setText("Estimado contribuyente,\n\nSu nombre de usuario es: " + usuario.getNombreUsuario()
-                    + "\n\nAtentamente,\nSUNAT ERP");
-            mailSender.send(message);
+            emailService.enviarCorreo(
+                    correo,
+                    "Recuperación de Usuario - SUNAT ERP",
+                    "Estimado contribuyente,\n\nSu nombre de usuario es: " + usuario.getNombreUsuario()
+                            + "\n\nAtentamente,\nSUNAT ERP"
+            );
 
             response.put("mensaje", "Se ha enviado su nombre de usuario al correo ingresado.");
             return ResponseEntity.ok(response);
@@ -95,12 +94,12 @@ public class AuthController {
             cv.setFechaExpiracion(LocalDateTime.now().plusMinutes(5));
             codigoVerificacionRepository.save(cv);
 
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(correo);
-            message.setSubject("Restablecimiento de Contraseña - SUNAT ERP");
-            message.setText("Estimado contribuyente,\n\nSu código de verificación es: " + codigo
-                    + "\nEste código expirará en 5 minutos.\n\nAtentamente,\nSUNAT ERP");
-            mailSender.send(message);
+            emailService.enviarCorreo(
+                    correo,
+                    "Restablecimiento de Contraseña - SUNAT ERP",
+                    "Estimado contribuyente,\n\nSu código de verificación es: " + codigo
+                            + "\nEste código expirará en 5 minutos.\n\nAtentamente,\nSUNAT ERP"
+            );
 
             response.put("mensaje", "Código de restablecimiento enviado correctamente");
             return ResponseEntity.ok(response);

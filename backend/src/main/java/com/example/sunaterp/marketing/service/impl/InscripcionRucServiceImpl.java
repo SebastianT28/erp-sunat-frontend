@@ -1,5 +1,6 @@
 package com.example.sunaterp.marketing.service.impl;
 
+import com.example.sunaterp.config.EmailService;
 import com.example.sunaterp.login.entity.Contribuyente;
 import com.example.sunaterp.login.entity.Usuario;
 import com.example.sunaterp.login.repository.ContribuyenteRepository;
@@ -11,8 +12,6 @@ import com.example.sunaterp.marketing.service.InscripcionRucService;
 import com.example.sunaterp.marketing.entity.CodigoVerificacion;
 import com.example.sunaterp.marketing.repository.CodigoVerificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,7 @@ public class InscripcionRucServiceImpl implements InscripcionRucService {
     private CodigoVerificacionRepository codigoVerificacionRepository;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private EmailService emailService;
 
     @Override
     @Transactional
@@ -87,11 +86,11 @@ public class InscripcionRucServiceImpl implements InscripcionRucService {
         cv.setFechaExpiracion(LocalDateTime.now().plusMinutes(5));
         codigoVerificacionRepository.save(cv);
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(correo);
-        message.setSubject("Código de Verificación - SUNAT ERP");
-        message.setText("Estimado contribuyente,\n\nSu código de verificación es: " + codigo + "\nEste código expirará en 5 minutos.\n\nAtentamente,\nSUNAT ERP");
-        mailSender.send(message);
+        emailService.enviarCorreo(
+                correo,
+                "Código de Verificación - SUNAT ERP",
+                "Estimado contribuyente,\n\nSu código de verificación es: " + codigo + "\nEste código expirará en 5 minutos.\n\nAtentamente,\nSUNAT ERP"
+        );
     }
 
     @Override
