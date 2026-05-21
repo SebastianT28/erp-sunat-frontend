@@ -8,7 +8,11 @@ import com.example.sunaterp.marketing.dto.InscripcionRucDTO;
 import com.example.sunaterp.marketing.entity.InscripcionRuc;
 import com.example.sunaterp.marketing.repository.InscripcionRucRepository;
 import com.example.sunaterp.marketing.service.InscripcionRucService;
+import com.example.sunaterp.marketing.entity.CodigoVerificacion;
+import com.example.sunaterp.marketing.repository.CodigoVerificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +29,12 @@ public class InscripcionRucServiceImpl implements InscripcionRucService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private CodigoVerificacionRepository codigoVerificacionRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     @Transactional
@@ -64,5 +74,39 @@ public class InscripcionRucServiceImpl implements InscripcionRucService {
         inscripcion.setContribuyente(contribuyente);
 
         return inscripcionRucRepository.save(inscripcion);
+    }
+
+    @Override
+    @Transactional
+    public void generarYEnviarCodigo(String correo) {
+        String codigo = String.format("%06d", new java.util.Random().nextInt(999999));
+        
+        CodigoVerificacion cv = new CodigoVerificacion();
+        cv.setCorreo(correo);
+        cv.setCodigo(codigo);
+        cv.setFechaExpiracion(LocalDateTime.now().plusMinutes(5));
+        codigoVerificacionRepository.save(cv);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(correo);
+        message.setSubject("Código de Verificación - SUNAT ERP");
+        message.setText("Estimado contribuyente,\n\nSu código de verificación es: " + codigo + "\nEste código expirará en 5 minutos.\n\nAtentamente,\nSUNAT ERP");
+        mailSender.send(message);
+    }
+
+    @Override
+    public boolean validarCodigo(String correo, String codigo) {
+        CodigoVerificacion cv = codigoVerificacionRepository.findFirstByCorreoOrderByFechaExpiracionDesc(correo)
+                .orElseThrow(() -> new RuntimeException("No se encontró código de verificación para este correo."));
+        
+        if (!cv.getCodigo().equals(codigo)) {
+            throw new RuntimeException("El código ingresado es incorrecto.");
+        }
+        
+        if (LocalDateTime.now().isAfter(cv.getFechaExpiracion())) {
+            throw new RuntimeException("El código de verificación ha expirado.");
+        }
+        
+        return true;
     }
 }

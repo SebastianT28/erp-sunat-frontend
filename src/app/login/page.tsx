@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { API_BASE_URL } from "../../config/api"
+import FormularioRecuperacion from "./FormularioRecuperacion"
 
 export default function Login() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [guardarDatos, setGuardarDatos] = useState(false)
   const [error, setError] = useState("")
+  const [isRecovering, setIsRecovering] = useState(false)
 
   const handleLogin = async () => {
     setError("")
@@ -71,6 +73,10 @@ export default function Login() {
   const handleRegister = () => {
     // Si tu modulo se llama logistica, cambia "/marketing" por "/logistica"
     router.push("/marketing")
+  }
+
+  if (isRecovering) {
+    return <FormularioRecuperacion onBack={() => setIsRecovering(false)} />
   }
 
   return (
@@ -185,7 +191,10 @@ export default function Login() {
 
             {/* Olvido contraseña */}
             <div className="text-center mt-5 text-sm text-black">
-              <p className="font-extrabold cursor-pointer hover:underline">
+              <p 
+                onClick={() => setIsRecovering(true)}
+                className="font-extrabold cursor-pointer hover:underline"
+              >
                 ¿Olvidaste tu usuario o contraseña?
               </p>
             </div>
