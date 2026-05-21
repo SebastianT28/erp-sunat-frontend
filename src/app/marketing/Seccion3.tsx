@@ -25,12 +25,12 @@ export default function Seccion3({ formData, updateFormData, nextStep, prevStep 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo: formData.correo }),
         });
-        
+
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.error || "Error al enviar el código");
         }
-        
+
         setCodigoEnviado(true);
         // Foco automático en el primer input después de un breve delay para que renderice
         setTimeout(() => {
@@ -53,12 +53,12 @@ export default function Seccion3({ formData, updateFormData, nextStep, prevStep 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ correo: formData.correo, codigo: otp.join("") }),
         });
-        
+
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.error || "Código inválido");
         }
-        
+
         nextStep();
       } catch (error: any) {
         alert(error.message);
@@ -161,7 +161,7 @@ export default function Seccion3({ formData, updateFormData, nextStep, prevStep 
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Ingresa el código de 6 dígitos</h3>
             <p className="text-sm text-gray-600 mb-8 max-w-md mx-auto">
-              Hemos enviado un mensaje de texto a <span className="font-semibold text-gray-800">+51 {formData.telefono}</span> y un correo a <span className="font-semibold text-gray-800">{formData.correo}</span>.
+              Hemos enviado un código de seguridad a su correo electrónico <span className="font-semibold text-gray-800">{formData.correo}</span>.
             </p>
 
             <div className="flex justify-center gap-2 sm:gap-3 mb-8" onPaste={handlePaste}>
@@ -219,7 +219,7 @@ export default function Seccion3({ formData, updateFormData, nextStep, prevStep 
           >
             ANTERIOR
           </button>
-          
+
           {!codigoEnviado && (
             <button
               onClick={handleSendCode}
