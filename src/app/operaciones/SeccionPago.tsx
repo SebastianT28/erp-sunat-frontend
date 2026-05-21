@@ -31,7 +31,7 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
       // Generate random strings
       const genNps = Math.floor(100000000000 + Math.random() * 900000000000).toString(); // 12 digits
       const genOrden = Math.floor(100000000 + Math.random() * 900000000).toString(); // 9 digits
-      
+
       const hoy = new Date();
       hoy.setDate(hoy.getDate() + 15);
       const fechaVenc = hoy.toISOString().split('T')[0];
@@ -61,7 +61,7 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
             setEstadoPago('PENDIENTE');
           } else {
             // Revertir a pendiente aunque falle, para demo
-            setEstadoPago('PENDIENTE'); 
+            setEstadoPago('PENDIENTE');
           }
         } catch (error) {
           setEstadoPago('PENDIENTE');
@@ -77,7 +77,10 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
   const simularPago = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/produccion/pagos/${numeroOrden}/pagar`, {
-        method: "PATCH"
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        }
       });
       if (response.ok) {
         alert("¡Pago Procesado con Éxito!");
@@ -108,7 +111,7 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
           </nav>
         </div>
       </header>
-      
+
       <div className="bg-[#0071BC] h-14 w-full shadow-md flex items-center px-8"></div>
 
       <div className="max-w-3xl mx-auto px-4 mt-10">
