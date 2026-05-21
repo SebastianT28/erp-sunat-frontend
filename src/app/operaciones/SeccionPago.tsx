@@ -82,10 +82,14 @@ export default function SeccionPago({ alFinalizar, datos }: { alFinalizar: () =>
       if (response.ok) {
         alert("¡Pago Procesado con Éxito!");
         setEstadoPago('PAGADO');
+      } else {
+        const errorData = await response.text();
+        console.error("Error al procesar el pago:", errorData);
+        alert("Error al procesar el pago. Por favor revise la consola.");
       }
-      // Silencioso si falla
     } catch (e) {
-      // Silencioso en caso de excepción
+      console.error("Excepción al procesar el pago:", e);
+      alert("Error de red o CORS al procesar el pago. Por favor revise la consola.");
     }
   };
 
