@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState } from "react"
 import { API_BASE_URL } from "../../config/api"
@@ -111,7 +113,7 @@ export default function EmisionGREPuntoTraslado({ onVolver, onSiguiente }: Emisi
                 frecuente: guardarFrecuente,
             }
 
-            const res = await fetch(API_URL, {
+            const res = await fetchWithAuth(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
@@ -146,7 +148,7 @@ export default function EmisionGREPuntoTraslado({ onVolver, onSiguiente }: Emisi
         setErrorFrecuentes("")
         setBusquedaFrecuente("")
         try {
-            const res = await fetch(`${API_URL}/frecuentes?tipo=${tipo}`)
+            const res = await fetchWithAuth(`${API_URL}/frecuentes?tipo=${tipo}`)
             const data = await res.json()
             if (data.success) {
                 setFrecuentes(data.data)

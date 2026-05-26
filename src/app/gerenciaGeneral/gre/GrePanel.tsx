@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../../config/api"
 
+import { fetchWithAuth } from "@/utils/fetchWithAuth"
+
 export default function GrePanel() {
     const [gres, setGres] = useState<any[]>([])
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/api/gerencia/gres`)
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/gres`)
             .then(res => res.json())
             .then(data => setGres(data))
             .catch(err => console.error(err))
@@ -20,7 +22,7 @@ export default function GrePanel() {
     const [greToDelete, setGreToDelete] = useState<number | null>(null)
 
     const handleUpdateGre = () => {
-        fetch(`${API_BASE_URL}/api/gerencia/gres/${editGre.id}`, {
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/gres/${editGre.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editGre)
@@ -40,7 +42,7 @@ export default function GrePanel() {
 
     const executeDelete = () => {
         if (greToDelete === null) return
-        fetch(`${API_BASE_URL}/api/gerencia/gres/${greToDelete}`, { method: "DELETE" })
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/gres/${greToDelete}`, { method: "DELETE" })
             .then(() => {
                 setGres(gres.filter(g => g.id !== greToDelete))
                 setIsDeleteModalOpen(false)

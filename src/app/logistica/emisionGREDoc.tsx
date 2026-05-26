@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState } from "react"
 import { API_BASE_URL } from "../../config/api"
@@ -54,7 +56,7 @@ export default function EmisionGREDoc({ onVolver, onSiguiente }: EmisionGREDocPr
     setMensajeBusqueda("")
     setDocumentoValidado(false)
     try {
-      const res = await fetch(
+      const res = await fetchWithAuth(
         `${API_BASE_URL}/api/logistica/documento-relacionado/validar?tipo=${encodeURIComponent(modalTipo)}&serie=${encodeURIComponent(modalSerie.trim())}&numero=${encodeURIComponent(modalNumero.trim())}`
       )
       const data = await res.json()

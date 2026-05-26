@@ -2,6 +2,7 @@ package com.example.sunaterp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -13,6 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private com.example.sunaterp.security.JwtRequestFilter jwtRequestFilter;
 
     // Configura cómo Spring compara contraseñas
     // Usamos un encoder de texto plano ya que las contraseñas en la BD no están encriptadas aún
@@ -31,14 +35,12 @@ public class SecurityConfig {
         };
     }
 
-    // Bean del AuthenticationManager (necesario para JWT más adelante)
+    // Bean del AuthenticationManager (necesario para JWT)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // Spring Security detecta automáticamente el UserDetailsServiceImpl y el PasswordEncoder
-    // y los conecta internamente sin necesidad de crear un DaoAuthenticationProvider manualmente
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -46,14 +48,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             // 2. Configurar CORS (usará la configuración de CorsConfig)
             .cors(Customizer.withDefaults())
-            // 3. Todas las rutas de la API son públicas por ahora
-            //    Cuando implementemos JWT, solo /api/login/usuarios/auth y /api/auth/** serán públicas
+            // 3. Configurar qué rutas son públicas y cuáles protegidas
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/**").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers("/api/login/usuarios/auth").permitAll() // Login
+                .requestMatchers("/api/auth/**").permitAll()             // Recuperación de clave
+                .requestMatchers("/api/marketing/**").permitAll()        // Módulo público
+                .anyRequest().authenticated()                            // Todo lo demás protegido
             )
-            // 4. Usar autenticación básica por el momento
-            .httpBasic(Customizer.withDefaults());
+            // 4. Configurar manejo de sesión a STATELESS porque usamos JWT
+            .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
+
+        // 5. Añadir nuestro filtro JWT antes del filtro de validación de usuario y contraseña
+        http.addFilterBefore(jwtRequestFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

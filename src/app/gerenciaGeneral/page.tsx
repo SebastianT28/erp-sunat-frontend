@@ -8,6 +8,8 @@ import ContribuyentesPanel from "./contribuyentes/ContribuyentesPanel"
 import GrePanel from "./gre/GrePanel"
 import DeclaracionesPanel from "./declaraciones/DeclaracionesPanel"
 
+import { fetchWithAuth } from "@/utils/fetchWithAuth"
+
 export default function GerenciaGeneral() {
     const router = useRouter()
     const [activeTab, setActiveTab] = useState("dashboard")
@@ -21,7 +23,7 @@ export default function GerenciaGeneral() {
 
     useEffect(() => {
         // Fetch dashboard metrics
-        fetch(`${API_BASE_URL}/api/gerencia/dashboard`)
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/dashboard`)
             .then(res => res.json())
             .then(data => setDashboardData(data))
             .catch(err => console.error("Error al cargar el dashboard:", err))

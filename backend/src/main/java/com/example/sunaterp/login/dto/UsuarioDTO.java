@@ -5,6 +5,7 @@ public class UsuarioDTO {
     private String nombreUsuario;
     private String correo;
     private String rol;
+    private String token; // Añadido para enviar el JWT
     private ContribuyenteDTO contribuyente;
 
     public UsuarioDTO() {}
@@ -39,6 +40,14 @@ public class UsuarioDTO {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public ContribuyenteDTO getContribuyente() {

@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState, useEffect } from "react"
 import jsPDF from "jspdf"
@@ -41,7 +43,7 @@ export default function ConsultaGRE() {
         
         try {
             const numFormateado = numero.padStart(6, '0')
-            const res = await fetch(`${API_BASE_URL}/api/logistica/gre/buscar?serie=${serie.toUpperCase()}&numero=${numFormateado}`)
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/logistica/gre/buscar?serie=${serie.toUpperCase()}&numero=${numFormateado}`)
             const data = await res.json()
 
             if (data.success && data.data) {

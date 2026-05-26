@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../config/api"
@@ -83,7 +85,7 @@ export default function EmisionGRE() {
     setBuscando(true)
     setMensajeBusqueda("")
     try {
-      const res = await fetch(`${API_URL.replace("/gre", "/destinatario")}/buscar?numeroDocumento=${numDoc.trim()}`)
+      const res = await fetchWithAuth(`${API_URL.replace("/gre", "/destinatario")}/buscar?numeroDocumento=${numDoc.trim()}`)
       const data = await res.json()
       if (data.success && data.encontrado) {
         setModalNombre(data.data.nombre)

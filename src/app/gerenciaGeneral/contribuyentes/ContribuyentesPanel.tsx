@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../../config/api"
+import { fetchWithAuth } from "@/utils/fetchWithAuth"
 
 export default function ContribuyentesPanel() {
     const [usuarios, setUsuarios] = useState<any[]>([])
@@ -24,7 +25,7 @@ export default function ContribuyentesPanel() {
     })
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/api/gerencia/usuarios`)
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/usuarios`)
             .then(res => res.json())
             .then(data => setUsuarios(data))
             .catch(err => console.error(err))
@@ -33,7 +34,7 @@ export default function ContribuyentesPanel() {
     useEffect(() => {
         if (newUser.ruc.length === 11) {
             setRucStatus("loading")
-            fetch(`${API_BASE_URL}/api/login/contribuyentes/${newUser.ruc}`)
+            fetchWithAuth(`${API_BASE_URL}/api/login/contribuyentes/${newUser.ruc}`)
                 .then(res => {
                     if (res.ok) {
                         return res.json()
@@ -65,7 +66,7 @@ export default function ContribuyentesPanel() {
             return
         }
 
-        fetch(`${API_BASE_URL}/api/gerencia/usuarios`, {
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/usuarios`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newUser)
@@ -86,7 +87,7 @@ export default function ContribuyentesPanel() {
             return
         }
 
-        fetch(`${API_BASE_URL}/api/gerencia/usuarios/${editUser.id}`, {
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/usuarios/${editUser.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(editUser)
@@ -109,7 +110,7 @@ export default function ContribuyentesPanel() {
 
     const executeDelete = () => {
         if (userToDelete === null) return
-        fetch(`${API_BASE_URL}/api/gerencia/usuarios/${userToDelete}`, { method: "DELETE" })
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/usuarios/${userToDelete}`, { method: "DELETE" })
             .then(() => {
                 setUsuarios(usuarios.filter(x => x.id !== userToDelete))
                 setIsDeleteModalOpen(false)

@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState } from "react"
 import { API_BASE_URL } from "../../../config/api"
@@ -57,7 +59,7 @@ export default function ModalTransportista({ onAgregar, onCerrar }: ModalTranspo
         setEstadoRuc("buscando")
         setMensajeError("")
         try {
-            const res = await fetch(`${API_URL}/validar/${rucValue}`)
+            const res = await fetchWithAuth(`${API_URL}/validar/${rucValue}`)
             const data = await res.json()
 
             if (data.success && data.existe) {
@@ -92,7 +94,7 @@ export default function ModalTransportista({ onAgregar, onCerrar }: ModalTranspo
             setGuardando(true)
             setMensajeError("")
             try {
-                const res = await fetch(API_URL, {
+                const res = await fetchWithAuth(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -119,7 +121,7 @@ export default function ModalTransportista({ onAgregar, onCerrar }: ModalTranspo
         // Si ya existe y se marca como frecuente, actualizar en BD
         if (estadoRuc === "encontrado" && frecuente) {
             try {
-                await fetch(`${API_URL}/${ruc}`, {
+                await fetchWithAuth(`${API_URL}/${ruc}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ frecuente: true }),

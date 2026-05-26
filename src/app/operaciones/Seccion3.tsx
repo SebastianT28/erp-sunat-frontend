@@ -1,4 +1,6 @@
-"use client";
+"use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+;
 
 import React, { useState, useMemo } from 'react';
 import Link from "next/link";
@@ -76,7 +78,7 @@ export default function Seccion3({ alAnterior, alPago, datos, actualizarDatos }:
     console.log("JSON ENVIADO AL BACKEND:", JSON.stringify(datos, null, 2));
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/produccion/formularios`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/produccion/formularios`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

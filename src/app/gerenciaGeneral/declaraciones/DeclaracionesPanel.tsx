@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../../config/api"
 
+import { fetchWithAuth } from "@/utils/fetchWithAuth"
+
 export default function DeclaracionesPanel() {
     const [declaraciones, setDeclaraciones] = useState<any[]>([])
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/api/gerencia/declaraciones`)
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/declaraciones`)
             .then(res => res.json())
             .then(data => setDeclaraciones(data))
             .catch(err => console.error(err))
@@ -23,7 +25,7 @@ export default function DeclaracionesPanel() {
 
     const executeDelete = () => {
         if (declaracionToDelete === null) return
-        fetch(`${API_BASE_URL}/api/gerencia/declaraciones/${declaracionToDelete}`, { method: "DELETE" })
+        fetchWithAuth(`${API_BASE_URL}/api/gerencia/declaraciones/${declaracionToDelete}`, { method: "DELETE" })
             .then(() => {
                 setDeclaraciones(declaraciones.filter(d => d.id !== declaracionToDelete))
                 setIsDeleteModalOpen(false)

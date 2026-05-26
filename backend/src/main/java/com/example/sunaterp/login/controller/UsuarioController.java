@@ -19,6 +19,12 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private com.example.sunaterp.security.JwtUtil jwtUtil;
+
+    @Autowired
+    private com.example.sunaterp.security.UserDetailsServiceImpl userDetailsService;
+
     @PostMapping("/auth")
     public ResponseEntity<?> authenticate(@RequestBody LoginRequestDTO loginRequest) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByNombreUsuario(loginRequest.getNombreUsuario());
@@ -42,11 +48,16 @@ public class UsuarioController {
             }
         }
 
+        // Generar JWT
+        org.springframework.security.core.userdetails.UserDetails userDetails = userDetailsService.loadUserByUsername(usuario.getNombreUsuario());
+        String jwtToken = jwtUtil.generateToken(userDetails);
+
         UsuarioDTO responseDTO = new UsuarioDTO();
         responseDTO.setIdUsuario(usuario.getIdUsuario());
         responseDTO.setNombreUsuario(usuario.getNombreUsuario());
         responseDTO.setCorreo(usuario.getCorreo());
         responseDTO.setRol(usuario.getRol());
+        responseDTO.setToken(jwtToken); // Asignamos el token generado
 
         if (usuario.getContribuyente() != null) {
             com.example.sunaterp.login.dto.ContribuyenteDTO cDTO = new com.example.sunaterp.login.dto.ContribuyenteDTO();

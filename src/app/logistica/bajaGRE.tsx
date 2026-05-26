@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState } from "react"
 import { API_BASE_URL } from "../../config/api"
@@ -36,7 +38,7 @@ export default function BajaGRE() {
         try {
             const numFormat = numero.padStart(6, '0')
             const url = `${API_BASE_URL}/api/logistica/gre/buscar-baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${serie.toUpperCase()}&numero=${numFormat}`
-            const res = await fetch(url)
+            const res = await fetchWithAuth(url)
             const data = await res.json()
 
             if (data.success && data.data) {
@@ -72,7 +74,7 @@ export default function BajaGRE() {
         setMostrarModalConfirmacion(false)
         try {
             const url = `${API_BASE_URL}/api/logistica/gre/baja?tipoGuia=${tipoGRE.toLowerCase()}&serie=${greEncontrada.serie}&numero=${greEncontrada.numero}`
-            const res = await fetch(url, { method: "DELETE" })
+            const res = await fetchWithAuth(url, { method: "DELETE" })
             const data = await res.json()
             
             if (res.ok && data.success) {

@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../config/api"
@@ -61,7 +63,7 @@ export default function NoConformidadGRE() {
 
         try {
             const url = `${API_BASE_URL}/api/logistica/gre/pendientes-reclamo?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}&numeroDocumento=${numeroDocumento}`
-            const res = await fetch(url)
+            const res = await fetchWithAuth(url)
             const data = await res.json()
 
             if (data.success) {
@@ -94,7 +96,7 @@ export default function NoConformidadGRE() {
                 motivo: motivoReclamo
             }
 
-            const res = await fetch(`${API_BASE_URL}/api/logistica/notificacion/reclamo`, {
+            const res = await fetchWithAuth(`${API_BASE_URL}/api/logistica/notificacion/reclamo`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

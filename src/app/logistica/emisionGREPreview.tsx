@@ -1,4 +1,6 @@
 "use client"
+import { fetchWithAuth } from "@/utils/fetchWithAuth";
+
 
 import { useState } from "react"
 import jsPDF from "jspdf"
@@ -322,7 +324,7 @@ export default function EmisionGREPreview({
         }
 
         try {
-            const response = await fetch(`${API_URL}/emitir`, {
+            const response = await fetchWithAuth(`${API_URL}/emitir`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
