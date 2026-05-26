@@ -10,7 +10,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -21,11 +20,21 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    // Configura cómo Spring encripta y compara contraseñas
-    // Usamos NoOpPasswordEncoder temporalmente para no romper tus contraseñas actuales en texto plano
+    // Configura cómo Spring compara contraseñas
+    // Usamos un encoder de texto plano ya que las contraseñas en la BD no están encriptadas aún
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        return new PasswordEncoder() {
+            @Override
+            public String encode(CharSequence rawPassword) {
+                return rawPassword.toString();
+            }
+
+            @Override
+            public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                return rawPassword.toString().equals(encodedPassword);
+            }
+        };
     }
 
     // Configura el proveedor que unirá el UserDetailsService con el PasswordEncoder
@@ -49,20 +58,18 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             // 2. Configurar CORS (usará la configuración de CorsConfig)
             .cors(Customizer.withDefaults())
-            // 3. Configuración de acceso a rutas:
-            //    - Rutas de la API son públicas (el frontend no envía credenciales en cada petición todavía)
-            //    - Cuando implementemos JWT, solo /api/login/usuarios/auth y /api/auth/** serán públicas
-            //    - y el resto requerirá el token JWT en el header Authorization
+            // 3. Todas las rutas de la API son públicas por ahora
+            //    Cuando implementemos JWT, solo /api/login/usuarios/auth y /api/auth/** serán públicas
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
-            // 4. Usar autenticación básica (usuario/contraseña en headers) por el momento
+            // 4. Usar autenticación básica por el momento
             .httpBasic(Customizer.withDefaults());
             
-        // Le indicamos que use nuestro proveedor de autenticación con base de datos
         http.authenticationProvider(authenticationProvider());
             
         return http.build();
     }
 }
+
