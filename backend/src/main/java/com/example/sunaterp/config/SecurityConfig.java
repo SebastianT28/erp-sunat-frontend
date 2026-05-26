@@ -22,9 +22,10 @@ public class SecurityConfig {
     private UserDetailsServiceImpl userDetailsService;
 
     // Configura cómo Spring encripta y compara contraseñas
+    // Usamos NoOpPasswordEncoder temporalmente para no romper tus contraseñas actuales en texto plano
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
     }
 
     // Configura el proveedor que unirá el UserDetailsService con el PasswordEncoder
@@ -48,8 +49,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             // 2. Configurar CORS (usará la configuración de CorsConfig)
             .cors(Customizer.withDefaults())
-            // 3. Requerir autenticación para todas las peticiones
+            // 3. Requerir autenticación para todas las peticiones EXCEPTO login
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/login/usuarios/auth", "/api/auth/**").permitAll() // <-- Rutas públicas
                 .anyRequest().authenticated()
             )
             // 4. Usar autenticación básica (usuario/contraseña en headers) por el momento
