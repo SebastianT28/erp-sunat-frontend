@@ -49,9 +49,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             // 2. Configurar CORS (usará la configuración de CorsConfig)
             .cors(Customizer.withDefaults())
-            // 3. Requerir autenticación para todas las peticiones EXCEPTO login
+            // 3. Configuración de acceso a rutas:
+            //    - Rutas de la API son públicas (el frontend no envía credenciales en cada petición todavía)
+            //    - Cuando implementemos JWT, solo /api/login/usuarios/auth y /api/auth/** serán públicas
+            //    - y el resto requerirá el token JWT en el header Authorization
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/login/usuarios/auth", "/api/auth/**").permitAll() // <-- Rutas públicas
+                .requestMatchers("/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             // 4. Usar autenticación básica (usuario/contraseña en headers) por el momento
