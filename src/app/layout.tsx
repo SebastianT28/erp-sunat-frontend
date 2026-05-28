@@ -20,6 +20,8 @@ export const metadata: Metadata = {
   description: "Sistema Web de Servicios Administrativos y Contables",
 };
 
+import HelpDeskWidget from "@/components/HelpDeskWidget/HelpDeskWidget";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,7 +32,10 @@ export default function RootLayout({
       lang="es"
       className={`${nunitoSans.variable} ${spectral.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <HelpDeskWidget />
+      </body>
     </html>
   );
 }
