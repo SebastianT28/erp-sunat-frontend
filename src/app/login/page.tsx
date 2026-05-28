@@ -57,11 +57,19 @@ export default function Login() {
          return
       }
 
+      const setCookies = (token: string, rol: string) => {
+        const expires = guardarDatos ? "; max-age=604800" : "" // 7 días si eligió guardar
+        document.cookie = `auth_token=${token}; path=/${expires}; SameSite=Lax`
+        document.cookie = `auth_rol=${rol}; path=/${expires}; SameSite=Lax`
+      }
+
       if (data.rol?.toLowerCase() === "administrador") {
         localStorage.setItem("user", JSON.stringify(data))
+        setCookies(data.token, data.rol)
         router.push("/gerenciaGeneral")
       } else {
         localStorage.setItem("user", JSON.stringify(data))
+        setCookies(data.token, data.rol)
         router.push("/dashboard")
       }
 

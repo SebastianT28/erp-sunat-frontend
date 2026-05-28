@@ -39,6 +39,8 @@ export default function GerenciaGeneral() {
 
     const handleLogout = () => {
         localStorage.removeItem("user")
+        document.cookie = "auth_token=; path=/; max-age=0"
+        document.cookie = "auth_rol=; path=/; max-age=0"
         router.push("/login")
     }
 

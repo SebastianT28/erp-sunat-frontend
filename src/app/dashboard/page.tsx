@@ -9,6 +9,13 @@ export default function Dashboard() {
   const [tooltipGRE, setTooltipGRE] = useState(false)
   const [tooltipImpuestos, setTooltipImpuestos] = useState(false)
 
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    document.cookie = "auth_token=; path=/; max-age=0"
+    document.cookie = "auth_rol=; path=/; max-age=0"
+    router.push("/login")
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
 
@@ -146,7 +153,7 @@ export default function Dashboard() {
             {/* Botón Volver a inicio */}
             <div className="mt-8">
               <button
-                onClick={() => router.push("/login")}
+                onClick={handleLogout}
                 className="bg-gray-400 text-white px-6 py-2 font-extrabold text-sm shadow transition-colors duration-200 hover:bg-[#0063AE]"
               >
                 Volver a inicio
