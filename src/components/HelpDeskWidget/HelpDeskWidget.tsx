@@ -46,7 +46,7 @@ const INITIAL_MESSAGE: Message = {
   id: 'init-1',
   sender: 'bot',
   type: 'text',
-  text: '¡Hola! Soy el Asistente Virtual Inteligente del ERP SUNAT. ¿En qué te puedo ayudar hoy?'
+  text: '¡Hola! Soy Suny Bot, tu Asistente Virtual Inteligente del ERP SUNAT. ¿En qué te puedo ayudar hoy?'
 };
 
 const INITIAL_ACTIONS: Message = {
@@ -166,6 +166,13 @@ export default function HelpDeskWidget() {
       case "¿Cómo emito una GRE?":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Para emitir una GRE debes ir al menú Logística > Emisión GRE, completar los datos del remitente, transporte y bienes, y generar el documento." });
+          setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
+        });
+        break;
+
+      case "¿Cómo declarar impuestos?":
+        simulateTyping(() => {
+          addMessage({ sender: 'bot', type: 'text', text: "El proceso de declaración mensual consta de los siguientes pasos:\n\n1. Ingresa a la sección **Operaciones > Declaraciones**.\n2. Completa el **Formulario de Ingresos** registrando tus ventas brutas del mes.\n3. Completa el **Formulario de Gastos** registrando tus compras vinculadas a tu negocio.\n4. El sistema calculará automáticamente el IGV y el Impuesto a la Renta a pagar.\n5. Finalmente, presiona **Declarar y Pagar**." });
           setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
         });
         break;
@@ -296,7 +303,7 @@ export default function HelpDeskWidget() {
               <Icons.Bot />
             </div>
             <div>
-              <h3 className="font-extrabold text-[15px] leading-tight">Soporte Inteligente</h3>
+              <h3 className="font-extrabold text-[15px] leading-tight">Suny Bot</h3>
               <p className="text-[11px] text-blue-100 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full inline-block animate-pulse"></span>
                 En línea
