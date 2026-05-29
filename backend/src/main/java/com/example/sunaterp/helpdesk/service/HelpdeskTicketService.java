@@ -28,6 +28,8 @@ public class HelpdeskTicketService {
     public TicketResponseDTO crearTicketAutenticado(AuthTicketRequestDTO dto, Integer idUsuario) {
         HelpdeskTicket ticket = new HelpdeskTicket();
         ticket.setIdUsuarioLogueado(idUsuario);
+        ticket.setUsernameAfectado(dto.getUsernameAfectado());
+        ticket.setCorreoContacto(dto.getCorreoContacto());
         ticket.setDescripcion(dto.getDescripcion());
         
         return guardarYGenerarRespuesta(ticket);

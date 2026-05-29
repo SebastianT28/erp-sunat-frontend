@@ -1,7 +1,7 @@
 "use client"
-
 import React, { useState, useEffect, useRef } from 'react';
 import { API_BASE_URL } from '@/config/api';
+import { usePathname } from 'next/navigation';
 
 // --- Tipos de Datos ---
 type MessageType = 'text' | 'quick_actions' | 'ticket_status';
@@ -64,10 +64,11 @@ export default function HelpDeskWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const [chatState, setChatState] = useState<ChatState>('idle');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const pathname = usePathname();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Inicializar estado según cookies
+  // Inicializar estado según cookies y ruta
   useEffect(() => {
     const cookies = document.cookie.split(';');
     const hasToken = cookies.some(c => c.trim().startsWith('auth_token='));
@@ -91,7 +92,7 @@ export default function HelpDeskWidget() {
         }
       ]);
     }
-  }, []);
+  }, [pathname]);
 
   // Auto-scroll al último mensaje
   useEffect(() => {
@@ -129,6 +130,13 @@ export default function HelpDeskWidget() {
 
           let res;
           if (token) {
+            // Obtener datos del usuario de localStorage
+            const userStr = localStorage.getItem("user");
+            let userData = null;
+            if (userStr) {
+              try { userData = JSON.parse(userStr); } catch(e) {}
+            }
+
             // Usuario logueado
             res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/auth`, {
               method: 'POST',
@@ -136,7 +144,12 @@ export default function HelpDeskWidget() {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify({ descripcion: userText })
+              body: JSON.stringify({ 
+                descripcion: userText,
+                idUsuario: userData?.idUsuario || null,
+                usernameAfectado: userData?.nombreUsuario || 'Desconocido',
+                correoContacto: userData?.correo || 'Desconocido'
+              })
             });
           } else {
             // Usuario no logueado (público) - Se espera que ponga "usuario - descripcion"

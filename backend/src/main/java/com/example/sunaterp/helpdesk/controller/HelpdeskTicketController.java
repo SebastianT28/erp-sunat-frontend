@@ -35,12 +35,7 @@ public class HelpdeskTicketController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Aquí deberíamos obtener el ID del usuario. Dependiendo de cómo esté configurado tu UserDetails,
-        // podrías necesitar extraerlo. Por simplicidad, asumimos que podemos obtenerlo,
-        // o usaríamos un servicio para buscar el ID basado en el nombre de usuario (authentication.getName()).
-        // Para este ejemplo, pasaremos el ID como -1 temporalmente si no se extrae fácilmente, 
-        // pero idealmente deberías buscar el Usuario real.
-        Integer idUsuario = -1; // TODO: Reemplazar con lógica real de extracción de ID
+        Integer idUsuario = request.getIdUsuario();
         
         TicketResponseDTO response = ticketService.crearTicketAutenticado(request, idUsuario);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
