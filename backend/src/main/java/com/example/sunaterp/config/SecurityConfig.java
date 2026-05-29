@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/login/usuarios/auth").permitAll() // Login
                 .requestMatchers("/api/auth/**").permitAll()             // Recuperación de clave
                 .requestMatchers("/api/marketing/**").permitAll()        // Módulo público
+                .requestMatchers("/api/helpdesk/tickets/public").permitAll() // Creación de tickets sin login
+                .requestMatchers("/api/helpdesk/tickets/status/**").permitAll() // Consulta de tickets
                 .anyRequest().authenticated()                            // Todo lo demás protegido
             )
             // 4. Configurar manejo de sesión a STATELESS porque usamos JWT

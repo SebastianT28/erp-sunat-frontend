@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react';
+import { API_BASE_URL } from '@/config/api';
 
 // --- Tipos de Datos ---
 type MessageType = 'text' | 'quick_actions' | 'ticket_status';
@@ -58,12 +59,39 @@ const INITIAL_ACTIONS: Message = {
 
 export default function HelpDeskWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE, INITIAL_ACTIONS]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [chatState, setChatState] = useState<ChatState>('idle');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Inicializar estado según cookies
+  useEffect(() => {
+    const cookies = document.cookie.split(';');
+    const hasToken = cookies.some(c => c.trim().startsWith('auth_token='));
+    setIsLoggedIn(hasToken);
+
+    if (hasToken) {
+      setMessages([INITIAL_MESSAGE, INITIAL_ACTIONS]);
+    } else {
+      setMessages([
+        {
+          id: 'init-anon-1',
+          sender: 'bot',
+          type: 'text',
+          text: '¡Hola! Soy Suny Bot. Por favor, **inicie sesión** para poder mostrarte todas las opciones o poder ayudarte de forma personalizada.'
+        },
+        {
+          id: 'init-anon-2',
+          sender: 'bot',
+          type: 'quick_actions',
+          options: ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"]
+        }
+      ]);
+    }
+  }, []);
 
   // Auto-scroll al último mensaje
   useEffect(() => {
@@ -93,12 +121,51 @@ export default function HelpDeskWidget() {
 
     // Manejo de estados de conversación
     if (chatState === 'awaiting_ticket_creation') {
-      simulateTyping(() => {
-        addMessage({ 
-          sender: 'bot', 
-          type: 'text', 
-          text: `He registrado tu solicitud. Tu número de ticket es **#TK-${Math.floor(1000 + Math.random() * 9000)}**. Un agente revisará tu caso pronto.` 
-        });
+      simulateTyping(async () => {
+        try {
+          const cookies = document.cookie.split(';');
+          const tokenCookie = cookies.find(c => c.trim().startsWith('auth_token='));
+          const token = tokenCookie ? tokenCookie.split('=')[1] : null;
+
+          let res;
+          if (token) {
+            // Usuario logueado
+            res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/auth`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ descripcion: userText })
+            });
+          } else {
+            // Usuario no logueado (público) - Se espera que ponga "usuario - descripcion"
+            // Por simplicidad, tomamos todo como descripción si no hay un formato estricto
+            res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/public`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                usernameAfectado: userText.split(' ')[0], // Ejemplo básico 
+                correoContacto: "usuario@ejemplo.com", // Esto debería pedirse en un paso previo idealmente
+                descripcion: userText 
+              })
+            });
+          }
+
+          if (res.ok) {
+            const data = await res.json();
+            addMessage({ 
+              sender: 'bot', 
+              type: 'text', 
+              text: `He registrado tu solicitud en el área de **${data.areaAsignada.replace('_', ' ')}**. Tu número de ticket es **${data.numeroTicket}**. Un agente revisará tu caso pronto.` 
+            });
+          } else {
+            throw new Error("Error del servidor");
+          }
+        } catch (error) {
+          addMessage({ sender: 'bot', type: 'text', text: "Lo siento, hubo un error al registrar el ticket. Inténtalo más tarde." });
+        }
+
         setChatState('idle');
         setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
       }, 1500);
@@ -106,20 +173,28 @@ export default function HelpDeskWidget() {
     }
 
     if (chatState === 'awaiting_ticket_search') {
-      simulateTyping(() => {
-        // Simulamos la búsqueda de un ticket
-        const statuses: ('resuelto' | 'en_proceso' | 'pendiente')[] = ['resuelto', 'en_proceso', 'pendiente'];
-        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-        
-        addMessage({ 
-          sender: 'bot', 
-          type: 'ticket_status', 
-          ticketData: {
-            id: userText.toUpperCase(),
-            status: randomStatus,
-            description: 'Problema reportado con el acceso al sistema.'
+      simulateTyping(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/status/${userText.toUpperCase().trim()}`);
+          
+          if (res.ok) {
+            const data = await res.json();
+            addMessage({ 
+              sender: 'bot', 
+              type: 'ticket_status', 
+              ticketData: {
+                id: data.numeroTicket,
+                status: data.estado.toLowerCase() as any,
+                description: data.descripcion
+              }
+            });
+          } else {
+            addMessage({ sender: 'bot', type: 'text', text: `No pude encontrar ningún ticket con el código **${userText}**. Por favor, verifica el número e intenta nuevamente.` });
           }
-        });
+        } catch (error) {
+          addMessage({ sender: 'bot', type: 'text', text: "Hubo un error al consultar el sistema." });
+        }
+
         setChatState('idle');
         setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
       }, 1500);
@@ -177,17 +252,53 @@ export default function HelpDeskWidget() {
         });
         break;
 
+      case "Ir a Iniciar Sesión":
+        setIsOpen(false);
+        window.location.href = "/login";
+        break;
+
+      case "Tengo problemas al iniciar sesión":
+        simulateTyping(() => {
+          addMessage({ sender: 'bot', type: 'text', text: "¿Qué tipo de problema tienes al acceder?" });
+          addMessage({ sender: 'bot', type: 'quick_actions', options: [
+            "¿Olvidaste tu usuario o contraseña?",
+            "Otro problema de acceso",
+            "Volver atrás"
+          ] });
+        });
+        break;
+
+      case "¿Olvidaste tu usuario o contraseña?":
+        simulateTyping(() => {
+          addMessage({ sender: 'bot', type: 'text', text: "Ve a la pantalla de login y presiona **¿Olvidaste tu usuario o contraseña?**. Allí solo te pediremos tu RUC/DNI o correo para enviarte un enlace de recuperación." });
+          setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Ir a Iniciar Sesión", "Volver atrás"] }), 500);
+        });
+        break;
+
+      case "Otro problema de acceso":
+        simulateTyping(() => {
+          addMessage({ sender: 'bot', type: 'text', text: "Entiendo. Vamos a registrar un ticket. Por favor, **ingresa tu número de RUC o nombre de usuario** para identificarte (NO ingreses tu contraseña):" });
+          setChatState('awaiting_ticket_creation'); // Reutilizamos el estado, pero la lógica de envío puede variar
+        });
+        break;
+
+      case "Volver atrás":
+        simulateTyping(() => {
+          addMessage({ sender: 'bot', type: 'quick_actions', options: ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"] });
+        });
+        break;
+
       case "Volver al menú principal":
         setChatState('idle');
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "¿En qué más te puedo ayudar?" });
-          addMessage({ sender: 'bot', type: 'quick_actions', options: INITIAL_QUICK_ACTIONS });
+          addMessage({ sender: 'bot', type: 'quick_actions', options: isLoggedIn ? INITIAL_QUICK_ACTIONS : ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"] });
         });
         break;
 
       default:
         simulateTyping(() => {
-          addMessage({ sender: 'bot', type: 'text', text: "Estamos transfiriendo tu solicitud a un asesor humano. Por favor espera en línea..." });
+          addMessage({ sender: 'bot', type: 'text', text: "Estamos transfiriendo tu solicitud a un asesor. Por favor espera..." });
         });
         break;
     }
