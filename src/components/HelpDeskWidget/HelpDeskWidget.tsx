@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 // --- Tipos de Datos ---
 type MessageType = 'text' | 'quick_actions' | 'ticket_status';
-type ChatState = 'idle' | 'awaiting_ticket_creation' | 'awaiting_ticket_search';
+type ChatState = 'idle' | 'awaiting_ticket_creation' | 'awaiting_ticket_search' | 'awaiting_anon_username' | 'awaiting_anon_email' | 'awaiting_anon_desc';
 
 interface Message {
   id: string;
@@ -64,6 +64,8 @@ export default function HelpDeskWidget() {
   const [isTyping, setIsTyping] = useState(false);
   const [chatState, setChatState] = useState<ChatState>('idle');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [anonUsername, setAnonUsername] = useState("");
+  const [anonEmail, setAnonEmail] = useState("");
   const pathname = usePathname();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -121,7 +123,25 @@ export default function HelpDeskWidget() {
     setInputText("");
 
     // Manejo de estados de conversación
-    if (chatState === 'awaiting_ticket_creation') {
+    if (chatState === 'awaiting_anon_username') {
+      setAnonUsername(userText);
+      simulateTyping(() => {
+        addMessage({ sender: 'bot', type: 'text', text: "Perfecto. Ahora, por favor ingresa un **correo electrónico** al cual podamos contactarte:" });
+        setChatState('awaiting_anon_email');
+      });
+      return;
+    }
+
+    if (chatState === 'awaiting_anon_email') {
+      setAnonEmail(userText);
+      simulateTyping(() => {
+        addMessage({ sender: 'bot', type: 'text', text: "Gracias. Finalmente, **describe brevemente el problema** que estás experimentando:" });
+        setChatState('awaiting_anon_desc');
+      });
+      return;
+    }
+
+    if (chatState === 'awaiting_ticket_creation' || chatState === 'awaiting_anon_desc') {
       simulateTyping(async () => {
         try {
           const cookies = document.cookie.split(';');
@@ -152,14 +172,13 @@ export default function HelpDeskWidget() {
               })
             });
           } else {
-            // Usuario no logueado (público) - Se espera que ponga "usuario - descripcion"
-            // Por simplicidad, tomamos todo como descripción si no hay un formato estricto
+            // Usuario no logueado (público) - Usamos los estados guardados
             res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/public`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                usernameAfectado: userText.split(' ')[0], // Ejemplo básico 
-                correoContacto: "usuario@ejemplo.com", // Esto debería pedirse en un paso previo idealmente
+                usernameAfectado: anonUsername, 
+                correoContacto: anonEmail, 
                 descripcion: userText 
               })
             });
@@ -291,7 +310,7 @@ export default function HelpDeskWidget() {
       case "Otro problema de acceso":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Entiendo. Vamos a registrar un ticket. Por favor, **ingresa tu número de RUC o nombre de usuario** para identificarte (NO ingreses tu contraseña):" });
-          setChatState('awaiting_ticket_creation'); // Reutilizamos el estado, pero la lógica de envío puede variar
+          setChatState('awaiting_anon_username');
         });
         break;
 
