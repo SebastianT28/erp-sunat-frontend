@@ -1,16 +1,15 @@
 "use client"
 import { fetchWithAuth } from "@/utils/fetchWithAuth";
 
-
 import { useState, useEffect } from "react"
 import { API_BASE_URL } from "../../config/api"
+import { motion, AnimatePresence } from "framer-motion"
 
 export default function NoConformidadGRE() {
     const [fechaDesde, setFechaDesde] = useState("")
     const [fechaHasta, setFechaHasta] = useState("")
     const [numeroDocumento, setNumeroDocumento] = useState("")
-    
-    // Estado del usuario en sesión
+
     const [usuarioInfo, setUsuarioInfo] = useState({ ruc: "", razonSocial: "", idUsuario: 1 })
 
     useEffect(() => {
@@ -23,21 +22,18 @@ export default function NoConformidadGRE() {
                     razonSocial: user.contribuyente?.razonSocial || user.razonSocial || "",
                     idUsuario: user.idUsuario || 1
                 })
-            } catch (e) {}
+            } catch (e) { }
         }
     }, [])
 
-    // Estados para la búsqueda
     const [buscando, setBuscando] = useState(false)
     const [resultados, setResultados] = useState<any[]>([])
     const [haBuscado, setHaBuscado] = useState(false)
-    
-    // Estados para el Modal de Reclamo
+
     const [greSeleccionada, setGreSeleccionada] = useState<any | null>(null)
     const [motivoReclamo, setMotivoReclamo] = useState("")
-    
-    // Notificación
-    const [notificacion, setNotificacion] = useState<{mensaje: string, tipo: 'exito' | 'error'} | null>(null)
+
+    const [notificacion, setNotificacion] = useState<{ mensaje: string, tipo: 'exito' | 'error' } | null>(null)
 
     const mostrarNotificacion = (mensaje: string, tipo: 'exito' | 'error') => {
         setNotificacion({ mensaje, tipo })
@@ -57,15 +53,12 @@ export default function NoConformidadGRE() {
             mostrarNotificacion("Por favor, ingrese el rango de fechas y el número de documento.", "error")
             return
         }
-
         setBuscando(true)
         setHaBuscado(true)
-
         try {
             const url = `${API_BASE_URL}/api/logistica/gre/pendientes-reclamo?fechaDesde=${fechaDesde}&fechaHasta=${fechaHasta}&numeroDocumento=${numeroDocumento}`
             const res = await fetchWithAuth(url)
             const data = await res.json()
-
             if (data.success) {
                 setResultados(data.data || [])
             } else {
@@ -74,7 +67,6 @@ export default function NoConformidadGRE() {
         } catch (err) {
             mostrarNotificacion("Error de conexión con el servidor.", "error")
         }
-        
         setBuscando(false)
     }
 
@@ -85,27 +77,19 @@ export default function NoConformidadGRE() {
 
     const enviarReclamo = async () => {
         if (!motivoReclamo.trim()) {
-            alert("Por favor, indique el motivo de la no conformidad.")
+            mostrarNotificacion("Por favor, indique el motivo de la no conformidad.", "error")
             return
         }
-
         try {
-            const payload = {
-                idUsuario: usuarioInfo.idUsuario,
-                idGre: greSeleccionada.idGre,
-                motivo: motivoReclamo
-            }
-
+            const payload = { idUsuario: usuarioInfo.idUsuario, idGre: greSeleccionada.idGre, motivo: motivoReclamo }
             const res = await fetchWithAuth(`${API_BASE_URL}/api/logistica/notificacion/reclamo`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             })
             const data = await res.json()
-
             if (data.success) {
                 mostrarNotificacion(`Reclamo presentado correctamente para la GRE ${greSeleccionada.serie}-${greSeleccionada.numero}.`, "exito")
-                // Quitar la GRE de la lista temporalmente (como si ya estuviera observada)
                 setResultados(resultados.filter(r => r.idGre !== greSeleccionada.idGre))
                 setGreSeleccionada(null)
             } else {
@@ -117,182 +101,244 @@ export default function NoConformidadGRE() {
     }
 
     return (
-        <div className="w-full max-w-6xl mx-auto bg-white p-6 shadow-sm rounded-sm relative">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-[#0063AE] font-extrabold text-base">Pendientes de revisión (No Conformidad)</h2>
-                <button className="text-red-500 text-sm font-extrabold flex items-center gap-1 hover:underline">
-                    <span className="w-4 h-4 rounded-full border border-red-500 flex items-center justify-center text-[10px]">i</span>
-                    Ayuda
-                </button>
-            </div>
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-2xl border border-white/50 relative overflow-hidden"
+        >
+            {/* Decoración de fondo */}
+            <div className="absolute top-[-60px] right-[-60px] w-[240px] h-[240px] bg-amber-100/40 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute bottom-[-40px] left-[-40px] w-[180px] h-[180px] bg-blue-100/40 rounded-full blur-[60px] pointer-events-none" />
 
-            <h3 className="text-black font-extrabold text-sm mb-6">Buscar Guías de Remisión asociadas</h3>
-
-            {/* Formulario de búsqueda */}
-            <div className="grid grid-cols-[auto_1fr_auto_1fr] gap-x-6 gap-y-6 items-center mb-8 bg-gray-50 p-6 rounded border border-gray-200">
-                
-                {/* Fechas */}
-                <label className="text-black font-extrabold text-sm whitespace-nowrap text-right">Fecha de Emisión del:</label>
-                <div className="flex items-center gap-2">
-                    <input 
-                        type="date" 
-                        value={fechaDesde}
-                        onChange={(e) => setFechaDesde(e.target.value)}
-                        className="border border-gray-300 px-3 py-1.5 text-sm w-36 focus:outline-none focus:border-[#0063AE] text-black"
-                    />
-                    <span className="text-black font-extrabold text-sm mx-1">al</span>
-                    <input 
-                        type="date" 
-                        value={fechaHasta}
-                        onChange={(e) => setFechaHasta(e.target.value)}
-                        className="border border-gray-300 px-3 py-1.5 text-sm w-36 focus:outline-none focus:border-[#0063AE] text-black"
-                    />
+            <div className="relative z-10">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-8">
+                    <div>
+                        <h2 className="text-[#0063AE] font-extrabold text-2xl mb-1 flex items-center gap-3">
+                            <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Pendientes de Revisión
+                        </h2>
+                        <p className="text-gray-400 text-sm">Busque guías de remisión y presente reclamaciones de no conformidad.</p>
+                    </div>
+                    <span className="flex items-center gap-1.5 text-amber-600 text-xs font-bold bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        No Conformidad GRE
+                    </span>
                 </div>
 
-                {/* Número de Documento */}
-                <label className="text-black font-extrabold text-sm whitespace-nowrap text-right">Número de documento:</label>
-                <input 
-                    type="text" 
-                    value={numeroDocumento}
-                    onChange={(e) => setNumeroDocumento(e.target.value)}
-                    placeholder="Ingrese N° documento"
-                    className="border border-gray-300 px-3 py-1.5 text-sm w-full focus:outline-none focus:border-[#0063AE] text-black"
-                />
-
-                {/* Condición del usuario (Solo texto) */}
-                <label className="text-black font-extrabold text-sm whitespace-nowrap text-right">Condición del usuario:</label>
-                <div className="text-gray-700 font-bold text-sm px-3 py-1.5 bg-gray-100 border border-gray-200 rounded cursor-not-allowed">
-                    Destinatario
-                </div>
-            </div>
-
-            {/* Botones de acción */}
-            <div className="flex justify-end gap-4 mb-8 border-b border-gray-200 pb-6">
-                <button 
-                    onClick={handleLimpiar}
-                    className="bg-white text-gray-500 border border-gray-300 px-8 py-2 rounded text-sm font-bold hover:bg-gray-100 transition-colors"
-                >
-                    Limpiar
-                </button>
-                <button 
-                    onClick={handleBuscar}
-                    disabled={buscando}
-                    className="bg-[#0063AE] text-white border border-[#0063AE] px-12 py-2 rounded text-sm font-bold hover:bg-[#004d8a] transition-colors shadow disabled:opacity-50"
-                >
-                    {buscando ? "Buscando..." : "Buscar Coincidencias"}
-                </button>
-            </div>
-
-            {/* Panel Dinámico / Tabla de resultados */}
-            <div className="overflow-x-auto min-h-[200px]">
-                <table className="w-full text-sm text-left border-collapse">
-                    <thead>
-                        <tr className="bg-gray-100 border-b border-gray-200">
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">N°</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">Tipo de GRE</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">Numeración</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">Fecha Emisión</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">RUC Emisor</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-left">Razón social del emisor</th>
-                            <th className="py-3 px-3 text-[#0063AE] font-extrabold whitespace-nowrap text-center">Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {!haBuscado && (
-                            <tr>
-                                <td colSpan={7} className="py-12 text-center text-gray-500 text-sm italic">
-                                    Utilice los filtros superiores para buscar guías de remisión pendientes de revisión.
-                                </td>
-                            </tr>
-                        )}
-                        {haBuscado && resultados.length === 0 && (
-                            <tr>
-                                <td colSpan={7} className="py-12 text-center text-red-500 text-sm font-bold">
-                                    No se encontraron guías de remisión que coincidan con los criterios.
-                                </td>
-                            </tr>
-                        )}
-                        {resultados.map((gre, index) => (
-                            <tr key={gre.idGre} className="border-b border-gray-100 hover:bg-blue-50 transition-colors animate-fade-in">
-                                <td className="py-3 px-3 text-center text-black">{index + 1}</td>
-                                <td className="py-3 px-3 text-center text-black font-bold">{gre.tipoGuia}</td>
-                                <td className="py-3 px-3 text-center text-black">{gre.serie}-{gre.numero}</td>
-                                <td className="py-3 px-3 text-center text-black">{gre.fechaEmision}</td>
-                                <td className="py-3 px-3 text-center text-black">{usuarioInfo.ruc}</td>
-                                <td className="py-3 px-3 text-left text-black font-bold">{usuarioInfo.razonSocial}</td>
-                                <td className="py-3 px-3 text-center">
-                                    <button 
-                                        onClick={() => abrirReclamo(gre)}
-                                        className="bg-[#b42828] text-white px-4 py-1.5 rounded text-xs font-extrabold shadow hover:bg-red-800 transition-colors"
-                                    >
-                                        Presentar Reclamo
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Modal para Presentar Reclamo */}
-            {greSeleccionada && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-                    <div className="bg-white p-6 rounded-lg shadow-2xl w-[500px] border-t-4 border-[#b42828]">
-                        <h2 className="text-xl font-extrabold text-[#b42828] mb-2">Presentar Reclamo</h2>
-                        <p className="text-gray-600 text-sm mb-4">
-                            Guía de Remisión: <span className="font-bold text-black">{greSeleccionada.serie}-{greSeleccionada.numero}</span><br/>
-                            Emisor: <span className="font-bold text-black">{greSeleccionada.razonSocialEmisor}</span>
-                        </p>
-
-                        <div className="mb-6">
-                            <label className="text-black font-extrabold text-sm mb-2 block">
-                                Motivo de la no conformidad <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                value={motivoReclamo}
-                                onChange={(e) => setMotivoReclamo(e.target.value)}
-                                placeholder="Describa el problema (ej. Cantidad incorrecta, bienes dañados...)"
-                                className="w-full border border-gray-300 rounded p-3 text-sm text-black focus:outline-none focus:border-[#b42828] resize-none h-32"
+                {/* Formulario de búsqueda */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+                    <h3 className="text-gray-700 font-bold text-sm mb-5">Buscar Guías de Remisión asociadas</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="md:col-span-2">
+                            <label className="text-gray-500 font-bold text-xs uppercase tracking-wide mb-2 block">Rango de Fechas de Emisión</label>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="date"
+                                    value={fechaDesde}
+                                    onChange={(e) => setFechaDesde(e.target.value)}
+                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0063AE]/20 focus:border-[#0063AE] transition-all"
+                                />
+                                <span className="text-gray-400 font-bold text-sm">al</span>
+                                <input
+                                    type="date"
+                                    value={fechaHasta}
+                                    onChange={(e) => setFechaHasta(e.target.value)}
+                                    className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0063AE]/20 focus:border-[#0063AE] transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-gray-500 font-bold text-xs uppercase tracking-wide mb-2 block">Número de Documento</label>
+                            <input
+                                type="text"
+                                value={numeroDocumento}
+                                onChange={(e) => setNumeroDocumento(e.target.value)}
+                                placeholder="N° de documento"
+                                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0063AE]/20 focus:border-[#0063AE] placeholder-gray-400 transition-all"
                             />
                         </div>
-
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setGreSeleccionada(null)}
-                                className="bg-gray-200 text-black px-5 py-2 rounded text-sm font-bold hover:bg-gray-300 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={enviarReclamo}
-                                className="bg-[#b42828] text-white px-6 py-2 rounded text-sm font-extrabold shadow hover:bg-red-800 transition-colors"
-                            >
-                                Enviar Reclamo
-                            </button>
+                        <div>
+                            <label className="text-gray-500 font-bold text-xs uppercase tracking-wide mb-2 block">Condición del usuario</label>
+                            <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-500 font-medium cursor-not-allowed">
+                                Destinatario
+                            </div>
                         </div>
                     </div>
+                    <div className="flex justify-end gap-3 mt-5 pt-5 border-t border-gray-100">
+                        <button
+                            onClick={handleLimpiar}
+                            className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
+                        >
+                            Limpiar
+                        </button>
+                        <button
+                            onClick={handleBuscar}
+                            disabled={buscando}
+                            className="flex items-center gap-2 bg-gradient-to-r from-[#0063AE] to-[#004d8a] text-white px-8 py-2.5 rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all disabled:opacity-50 active:scale-95"
+                        >
+                            {buscando ? (
+                                <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            )}
+                            {buscando ? "Buscando..." : "Buscar Coincidencias"}
+                        </button>
+                    </div>
                 </div>
-            )}
 
-            {/* Notificación flotante (Toast) */}
-            {notificacion && (
-                <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-fade-in ${
-                    notificacion.tipo === 'exito' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                }`}>
-                    {notificacion.tipo === 'exito' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-                        </svg>
-                    ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-                        </svg>
-                    )}
-                    <span className="font-extrabold text-sm">{notificacion.mensaje}</span>
+                {/* Tabla de resultados */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm text-left">
+                            <thead>
+                                <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">N°</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">Tipo GRE</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">Numeración</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">Fecha Emisión</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">RUC Emisor</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide">Razón Social</th>
+                                    <th className="py-3.5 px-4 text-[#0063AE] font-bold text-xs uppercase tracking-wide text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {!haBuscado && (
+                                    <tr>
+                                        <td colSpan={7} className="py-16 text-center">
+                                            <svg className="w-10 h-10 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                            </svg>
+                                            <p className="text-gray-400 text-sm font-medium">Use los filtros de arriba para buscar guías pendientes.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                                {haBuscado && resultados.length === 0 && (
+                                    <tr>
+                                        <td colSpan={7} className="py-16 text-center">
+                                            <svg className="w-10 h-10 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p className="text-gray-400 text-sm font-medium">No se encontraron guías que coincidan con los criterios.</p>
+                                        </td>
+                                    </tr>
+                                )}
+                                <AnimatePresence>
+                                    {resultados.map((gre, index) => (
+                                        <motion.tr
+                                            key={gre.idGre}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            className="border-b border-gray-50 hover:bg-blue-50/40 transition-colors group"
+                                        >
+                                            <td className="py-3.5 px-4 text-center text-gray-500 text-xs">{index + 1}</td>
+                                            <td className="py-3.5 px-4 text-center">
+                                                <span className="text-xs font-bold text-[#0063AE] bg-blue-50 px-2 py-1 rounded-lg">{gre.tipoGuia}</span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center text-gray-700 font-mono font-semibold text-xs">{gre.serie}-{gre.numero}</td>
+                                            <td className="py-3.5 px-4 text-center text-gray-600 text-xs">{gre.fechaEmision}</td>
+                                            <td className="py-3.5 px-4 text-center text-gray-600 font-mono text-xs">{usuarioInfo.ruc}</td>
+                                            <td className="py-3.5 px-4 text-gray-700 font-semibold text-xs">{usuarioInfo.razonSocial}</td>
+                                            <td className="py-3.5 px-4 text-center">
+                                                <button
+                                                    onClick={() => abrirReclamo(gre)}
+                                                    className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:shadow-red-500/30 hover:shadow-md transition-all active:scale-95"
+                                                >
+                                                    Presentar Reclamo
+                                                </button>
+                                            </td>
+                                        </motion.tr>
+                                    ))}
+                                </AnimatePresence>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            )}
-        </div>
+            </div>
+
+            {/* Modal Reclamo */}
+            <AnimatePresence>
+                {greSeleccionada && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-blue-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border-t-4 border-red-600"
+                        >
+                            <div className="bg-gradient-to-r from-red-50 to-orange-50 px-6 py-4 border-b border-red-100 flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-lg font-extrabold text-red-700">Presentar Reclamo</h2>
+                                    <p className="text-red-400 text-xs mt-0.5">
+                                        GRE: <span className="font-bold">{greSeleccionada.serie}-{greSeleccionada.numero}</span>
+                                        {greSeleccionada.razonSocialEmisor && <> · Emisor: <span className="font-bold">{greSeleccionada.razonSocialEmisor}</span></>}
+                                    </p>
+                                </div>
+                                <button onClick={() => setGreSeleccionada(null)} className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-500 hover:bg-red-200 transition-colors">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            <div className="p-6">
+                                <label className="text-gray-700 font-bold text-sm mb-2 block">
+                                    Motivo de la no conformidad <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    value={motivoReclamo}
+                                    onChange={(e) => setMotivoReclamo(e.target.value)}
+                                    placeholder="Describa el problema detalladamente (ej. Cantidad incorrecta, bienes dañados, error en destinatario...)"
+                                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 resize-none h-36 placeholder-gray-400 transition-all"
+                                />
+                                <div className="flex justify-end gap-3 mt-5">
+                                    <button onClick={() => setGreSeleccionada(null)} className="px-6 py-2.5 rounded-xl font-bold text-sm text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={enviarReclamo}
+                                        className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-7 py-2.5 rounded-xl text-sm font-extrabold shadow hover:shadow-red-500/30 hover:shadow-lg transition-all active:scale-95"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                        Enviar Reclamo
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Toast de notificación */}
+            <AnimatePresence>
+                {notificacion && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className={`fixed bottom-6 right-6 z-50 px-5 py-4 rounded-2xl shadow-2xl flex items-center gap-3 ${notificacion.tipo === 'exito' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}
+                    >
+                        {notificacion.tipo === 'exito'
+                            ? <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                            : <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        }
+                        <span className="font-bold text-sm max-w-xs">{notificacion.mensaje}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
     )
 }
