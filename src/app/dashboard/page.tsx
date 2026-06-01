@@ -181,16 +181,6 @@ export default function Dashboard() {
         >
           {/* Encabezado principal */}
           <motion.div variants={itemVariants} className="text-center mb-14">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="inline-flex items-center gap-2 bg-white/80 border border-blue-100 rounded-full px-5 py-2 text-xs font-bold text-[#0063AE] mb-5 shadow-sm"
-            >
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              ERP SUNAT — Sistema Integrado de Gestión Tributaria
-            </motion.div>
-
             <h1 className="text-4xl font-extrabold text-gray-800 mb-3 leading-tight">
               ¿Qué operación deseas
               <span className="bg-gradient-to-r from-[#0063AE] to-[#FF4081] bg-clip-text text-transparent"> realizar hoy</span>?
