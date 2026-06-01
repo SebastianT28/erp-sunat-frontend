@@ -23,16 +23,16 @@ interface Message {
 // --- SVGs Mapeados ---
 const Icons = {
   Bot: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
   ),
   Close: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
   ),
   Send: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
   ),
   Ticket: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /><path d="M13 5v2" /><path d="M13 17v2" /><path d="M13 11v2" /></svg>
   )
 };
 
@@ -67,7 +67,7 @@ export default function HelpDeskWidget() {
   const [anonUsername, setAnonUsername] = useState("");
   const [anonEmail, setAnonEmail] = useState("");
   const pathname = usePathname();
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Inicializar estado según cookies y ruta
@@ -154,17 +154,17 @@ export default function HelpDeskWidget() {
             const userStr = localStorage.getItem("user");
             let userData = null;
             if (userStr) {
-              try { userData = JSON.parse(userStr); } catch(e) {}
+              try { userData = JSON.parse(userStr); } catch (e) { }
             }
 
             // Usuario logueado
             res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/auth`, {
               method: 'POST',
-              headers: { 
+              headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 descripcion: userText,
                 idUsuario: userData?.idUsuario || null,
                 usernameAfectado: userData?.nombreUsuario || 'Desconocido',
@@ -176,20 +176,20 @@ export default function HelpDeskWidget() {
             res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/public`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                usernameAfectado: anonUsername, 
-                correoContacto: anonEmail, 
-                descripcion: userText 
+              body: JSON.stringify({
+                usernameAfectado: anonUsername,
+                correoContacto: anonEmail,
+                descripcion: userText
               })
             });
           }
 
           if (res.ok) {
             const data = await res.json();
-            addMessage({ 
-              sender: 'bot', 
-              type: 'text', 
-              text: `He registrado tu solicitud en el área de **${data.areaAsignada.replace('_', ' ')}**. Tu número de ticket es **${data.numeroTicket}**. Un agente revisará tu caso pronto.` 
+            addMessage({
+              sender: 'bot',
+              type: 'text',
+              text: `He registrado tu solicitud en el área de **${data.areaAsignada.replace('_', ' ')}**. Tu número de ticket es **${data.numeroTicket}**. Un agente revisará tu caso pronto.`
             });
           } else {
             throw new Error("Error del servidor");
@@ -208,12 +208,12 @@ export default function HelpDeskWidget() {
       simulateTyping(async () => {
         try {
           const res = await fetch(`${API_BASE_URL}/api/helpdesk/tickets/status/${userText.toUpperCase().trim()}`);
-          
+
           if (res.ok) {
             const data = await res.json();
-            addMessage({ 
-              sender: 'bot', 
-              type: 'ticket_status', 
+            addMessage({
+              sender: 'bot',
+              type: 'ticket_status',
               ticketData: {
                 id: data.numeroTicket,
                 status: data.estado.toLowerCase() as any,
@@ -250,7 +250,7 @@ export default function HelpDeskWidget() {
           setChatState('awaiting_ticket_creation');
         });
         break;
-      
+
       case "Consultar Estado de Ticket":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Por favor, ingresa tu número de ticket (Ejemplo: TK-1045):" });
@@ -261,15 +261,17 @@ export default function HelpDeskWidget() {
       case "Preguntas Frecuentes":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Aquí tienes algunas preguntas comunes:" });
-          addMessage({ sender: 'bot', type: 'quick_actions', options: [
-            "¿Cómo emito una GRE?", 
-            "He olvidado mi contraseña",
-            "¿Cómo declarar impuestos?",
-            "Volver al menú principal"
-          ] });
+          addMessage({
+            sender: 'bot', type: 'quick_actions', options: [
+              "¿Cómo emito una GRE?",
+              "He olvidado mi contraseña",
+              "¿Cómo declarar impuestos?",
+              "Volver al menú principal"
+            ]
+          });
         });
         break;
-      
+
       case "¿Cómo emito una GRE?":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Para emitir una GRE debes ir al menú Logística > Emisión GRE, completar los datos del remitente, transporte y bienes, y generar el documento." });
@@ -292,11 +294,13 @@ export default function HelpDeskWidget() {
       case "Tengo problemas al iniciar sesión":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "¿Qué tipo de problema tienes al acceder?" });
-          addMessage({ sender: 'bot', type: 'quick_actions', options: [
-            "¿Olvidaste tu usuario o contraseña?",
-            "Otro problema de acceso",
-            "Volver atrás"
-          ] });
+          addMessage({
+            sender: 'bot', type: 'quick_actions', options: [
+              "¿Olvidaste tu usuario o contraseña?",
+              "Otro problema de acceso",
+              "Volver atrás"
+            ]
+          });
         });
         break;
 
@@ -358,7 +362,7 @@ export default function HelpDeskWidget() {
       const { id, status, description } = msg.ticketData;
       let statusColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
       let statusText = "EN PROCESO";
-      
+
       if (status === 'resuelto') {
         statusColor = "bg-green-100 text-green-800 border-green-200";
         statusText = "RESUELTO";
@@ -388,13 +392,13 @@ export default function HelpDeskWidget() {
     }
 
     const isUser = msg.sender === 'user';
-    
+
     // Procesar negritas simples (ej. **texto**)
     const formatText = (text: string) => {
       const parts = text.split(/(\*\*.*?\*\*)/g);
-      return parts.map((part, i) => 
-        part.startsWith('**') && part.endsWith('**') 
-          ? <strong key={i} className="font-extrabold">{part.slice(2, -2)}</strong> 
+      return parts.map((part, i) =>
+        part.startsWith('**') && part.endsWith('**')
+          ? <strong key={i} className="font-extrabold">{part.slice(2, -2)}</strong>
           : part
       );
     };
@@ -406,16 +410,17 @@ export default function HelpDeskWidget() {
             <Icons.Bot />
           </div>
         )}
-        <div className={`max-w-[75%] px-4 py-2.5 text-[14px] leading-relaxed shadow-sm ${
-          isUser 
-            ? 'bg-gradient-to-r from-[#04508e] to-[#0063AE] text-white rounded-2xl rounded-br-sm' 
-            : 'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-bl-sm'
-        }`}>
+        <div className={`max-w-[75%] px-4 py-2.5 text-[14px] leading-relaxed shadow-sm ${isUser
+          ? 'bg-gradient-to-r from-[#04508e] to-[#0063AE] text-white rounded-2xl rounded-br-sm'
+          : 'bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-bl-sm'
+          }`}>
           {formatText(msg.text || '')}
         </div>
       </div>
     );
   };
+
+  if (pathname === "/") return null;
 
   return (
     <>
@@ -431,16 +436,15 @@ export default function HelpDeskWidget() {
       </button>
 
       {/* Ventana de Chat (Glassmorphism) */}
-      <div 
-        className={`fixed bottom-6 right-6 z-50 w-[360px] h-[550px] max-h-[85vh] max-w-[calc(100vw-32px)] flex flex-col bg-white/85 backdrop-blur-xl border border-white/40 shadow-2xl rounded-2xl overflow-hidden transition-all duration-400 transform origin-bottom-right ${
-          isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-8 pointer-events-none'
-        }`}
+      <div
+        className={`fixed bottom-6 right-6 z-50 w-[360px] h-[550px] max-h-[85vh] max-w-[calc(100vw-32px)] flex flex-col bg-white/85 backdrop-blur-xl border border-white/40 shadow-2xl rounded-2xl overflow-hidden transition-all duration-400 transform origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-8 pointer-events-none'
+          }`}
       >
         {/* Header */}
         <div className="h-16 bg-gradient-to-r from-[#0063AE] to-[#4481eb] flex items-center justify-between px-4 text-white shadow-md relative overflow-hidden">
           {/* Decoración de fondo */}
           <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          
+
           <div className="flex items-center gap-3 relative z-10">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
               <Icons.Bot />
@@ -453,7 +457,7 @@ export default function HelpDeskWidget() {
               </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors relative z-10"
           >
@@ -464,7 +468,7 @@ export default function HelpDeskWidget() {
         {/* Área de Mensajes */}
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50/50">
           {messages.map(msg => renderMessage(msg))}
-          
+
           {isTyping && (
             <div className="flex w-full my-3 justify-start items-end gap-2">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0063AE] to-[#004d8a] flex-shrink-0 flex items-center justify-center text-white shadow-sm mt-1">
@@ -482,25 +486,24 @@ export default function HelpDeskWidget() {
 
         {/* Barra de Input */}
         <div className="p-3 bg-white border-t border-gray-100">
-          <form 
+          <form
             onSubmit={handleSendText}
             className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 focus-within:border-[#4481eb] focus-within:ring-2 focus-within:ring-blue-100 transition-all shadow-inner"
           >
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Escribe tu mensaje aquí..."
               className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 py-1"
             />
-            <button 
+            <button
               type="submit"
               disabled={!inputText.trim() || isTyping}
-              className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
-                inputText.trim() && !isTyping 
-                  ? 'bg-gradient-to-r from-[#FF4081] to-[#e7306c] text-white shadow-md hover:shadow-lg' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
+              className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${inputText.trim() && !isTyping
+                ? 'bg-gradient-to-r from-[#FF4081] to-[#e7306c] text-white shadow-md hover:shadow-lg'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
             >
               <Icons.Send />
             </button>

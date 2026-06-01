@@ -46,15 +46,15 @@ export default function Login() {
       }
 
       const data = await res.json()
-      
+
       if (tipo === "admin" && data.rol?.toLowerCase() !== "administrador") {
-         setError("Acceso denegado: No tienes permisos de administrador.")
-         return
+        setError("Acceso denegado: No tienes permisos de administrador.")
+        return
       }
 
       if (tipo === "usuario" && data.rol?.toLowerCase() !== "contribuyente") {
-         setError("Acceso denegado: Por favor usa la pestaña correspondiente a tu rol.")
-         return
+        setError("Acceso denegado: Por favor usa la pestaña correspondiente a tu rol.")
+        return
       }
 
       const setCookies = (token: string, rol: string) => {
@@ -107,7 +107,7 @@ export default function Login() {
       {/* Contenedor Central */}
       <div className="flex flex-1 items-center justify-center">
         <div className="bg-white border border-gray-300 w-[520px] shadow-md mx-auto">
-          
+
           {/* Header azul */}
           <div className="bg-[#0063AE] text-white text-center py-4 font-extrabold text-lg">
             SUNAT Operaciones en Línea
@@ -119,11 +119,10 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setTipo("usuario")}
-                className={`px-5 py-2.5 font-extrabold ${
-                  tipo === "usuario"
-                    ? "bg-[#0063AE] text-white shadow"
-                    : "bg-gray-300 text-gray-600"
-                }`}
+                className={`px-5 py-2.5 font-extrabold ${tipo === "usuario"
+                  ? "bg-[#0063AE] text-white shadow"
+                  : "bg-gray-300 text-gray-600"
+                  }`}
               >
                 USUARIO
               </button>
@@ -131,11 +130,10 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setTipo("admin")}
-                className={`px-5 py-2.5 font-extrabold ${
-                  tipo === "admin"
-                    ? "bg-[#0063AE] text-white shadow"
-                    : "bg-gray-300 text-gray-600"
-                }`}
+                className={`px-5 py-2.5 font-extrabold ${tipo === "admin"
+                  ? "bg-[#0063AE] text-white shadow"
+                  : "bg-gray-300 text-gray-600"
+                  }`}
               >
                 ADMINISTRADOR
               </button>
@@ -185,21 +183,19 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setGuardarDatos(!guardarDatos)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${
-                  guardarDatos ? "bg-[#FF4081]" : "bg-gray-300"
-                }`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${guardarDatos ? "bg-[#FF4081]" : "bg-gray-300"
+                  }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out shadow ${
-                    guardarDatos ? "translate-x-6" : "translate-x-1"
-                  }`}
+                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200 ease-in-out shadow ${guardarDatos ? "translate-x-6" : "translate-x-1"
+                    }`}
                 />
               </button>
             </div>
 
             {/* Olvido contraseña */}
             <div className="text-center mt-5 text-sm text-black">
-              <p 
+              <p
                 onClick={() => setIsRecovering(true)}
                 className="font-extrabold cursor-pointer hover:underline"
               >
