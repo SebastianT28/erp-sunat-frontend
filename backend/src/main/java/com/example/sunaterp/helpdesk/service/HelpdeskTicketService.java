@@ -21,6 +21,7 @@ public class HelpdeskTicketService {
         ticket.setUsernameAfectado(dto.getUsernameAfectado());
         ticket.setCorreoContacto(dto.getCorreoContacto());
         ticket.setDescripcion(dto.getDescripcion());
+        ticket.setAreaAsignada("ATENCION_CLIENTE");
         
         return guardarYGenerarRespuesta(ticket);
     }
@@ -46,7 +47,9 @@ public class HelpdeskTicketService {
         ticket.setNumeroTicket(generarNumeroTicketUnico());
         
         // Asignar área automáticamente basada en palabras clave
-        ticket.setAreaAsignada(determinarArea(ticket.getDescripcion()));
+        if (ticket.getAreaAsignada() == null) {
+            ticket.setAreaAsignada(determinarArea(ticket.getDescripcion()));
+        }
         
         ticket = ticketRepository.save(ticket);
         
@@ -75,7 +78,7 @@ public class HelpdeskTicketService {
             return "SOPORTE_TECNICO";
         } else if (descLower.contains("impuesto") || descLower.contains("declarar") || descLower.contains("pago")) {
             return "OPERACIONES";
-        } else if (descLower.contains("gre") || descLower.contains("guía") || descLower.contains("remisión")) {
+        } else if (descLower.matches(".*\\bgre\\b.*") || descLower.contains("guía") || descLower.contains("remisión")) {
             return "LOGISTICA";
         }
         
