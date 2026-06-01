@@ -18,7 +18,6 @@ const modules = [
     accentBorder: "rgba(0,99,174,0.2)",
     badge: "Logística",
     badgeColor: "text-blue-600 bg-blue-50 border-blue-100",
-    features: ["Emisión GRE", "Consulta GRE", "Baja de GRE", "No conformidad"],
     gradient: "from-[#0063AE] to-[#004d8a]",
     glowColor: "rgba(0,99,174,0.15)",
     featureDetails: [
@@ -40,7 +39,6 @@ const modules = [
     accentBorder: "rgba(255,64,129,0.2)",
     badge: "Operaciones",
     badgeColor: "text-pink-600 bg-pink-50 border-pink-100",
-    features: ["Declarar impuestos", "Ver historial", "Calcular IGV", "Exportar PDF"],
     gradient: "from-[#FF4081] to-[#e7306c]",
     glowColor: "rgba(255,64,129,0.15)",
     featureDetails: [
@@ -266,19 +264,6 @@ export default function Dashboard() {
 
                     {/* Descripción */}
                     <p className="text-gray-500 text-sm leading-relaxed mb-5">{mod.description}</p>
-
-                    {/* Pills de funcionalidades */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {mod.features.map((f) => (
-                        <span
-                          key={f}
-                          className="text-[11px] font-semibold px-3 py-1 rounded-full"
-                          style={{ background: mod.accentLight, color: mod.accent, border: `1px solid ${mod.accentBorder}` }}
-                        >
-                          {f}
-                        </span>
-                      ))}
-                    </div>
 
                     {/* Panel expandible de funcionalidades */}
                     <AnimatePresence>
