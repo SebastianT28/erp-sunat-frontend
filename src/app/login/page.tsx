@@ -88,12 +88,12 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col relative">
       {/* Barra superior */}
       <div className="h-14 bg-[#0063AE]"></div>
 
       {/* Logo debajo de la barra */}
-      <div className="bg-white px-6 py-3">
+      <div className="bg-white px-6 py-3 shadow-sm">
         <Image
           src="/logo-sunat.png"
           alt="SUNAT Logo"
@@ -228,6 +228,19 @@ export default function Login() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Botón Volver al inicio (esquina inferior izquierda) */}
+      <div className="absolute bottom-6 left-6">
+        <button
+          onClick={() => router.push("/")}
+          className="text-[#0063AE] font-bold text-sm flex items-center gap-2 hover:underline"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Volver al Inicio
+        </button>
       </div>
     </div>
   )
