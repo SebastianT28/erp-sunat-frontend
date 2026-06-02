@@ -34,13 +34,13 @@ const modules = [
     subtitle: "Módulo Tributario",
     description: "La declaración mensual de impuestos es el proceso mediante el cual una empresa informa a la SUNAT sobre sus ingresos, ventas y tributos generados.",
     icon: "/icon-impuestos.png",
-    accent: "#FF4081",
-    accentLight: "rgba(255,64,129,0.08)",
-    accentBorder: "rgba(255,64,129,0.2)",
+    accent: "#0063AE",
+    accentLight: "rgba(0,99,174,0.08)",
+    accentBorder: "rgba(0,99,174,0.2)",
     badge: "Operaciones",
-    badgeColor: "text-pink-600 bg-pink-50 border-pink-100",
-    gradient: "from-[#FF4081] to-[#e7306c]",
-    glowColor: "rgba(255,64,129,0.15)",
+    badgeColor: "text-blue-600 bg-blue-50 border-blue-100",
+    gradient: "from-[#0063AE] to-[#004d8a]",
+    glowColor: "rgba(0,99,174,0.15)",
     featureDetails: [
       { icon: "📊", label: "Declarar impuestos", desc: "Registra ingresos, gastos y tributos del período mensual." },
       { icon: "📋", label: "Ver historial", desc: "Consulta el historial de declaraciones anteriores." },
@@ -122,7 +122,7 @@ export default function Dashboard() {
         <motion.div
           animate={{ scale: [1, 1.08, 1], opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-pink-200 rounded-full blur-[120px]"
+          className="absolute -bottom-32 -right-32 w-[500px] h-[500px] bg-blue-200 rounded-full blur-[120px]"
         />
         <motion.div
           animate={{ y: [0, -20, 0] }}
@@ -148,7 +148,7 @@ export default function Dashboard() {
 
             {/* Avatar + nombre */}
             <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0063AE] to-[#FF4081] flex items-center justify-center text-white font-bold text-xs shadow-md flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#0063AE] to-[#004d8a] flex items-center justify-center text-white font-bold text-xs shadow-md flex-shrink-0">
                 {userName ? userName.charAt(0).toUpperCase() : "U"}
               </div>
               {userName && <span className="text-gray-700 font-semibold text-sm">{userName}</span>}
@@ -169,7 +169,7 @@ export default function Dashboard() {
       </motion.header>
 
       {/* Barra rainbow */}
-      <div className="h-1 bg-gradient-to-r from-[#0063AE] via-[#FF4081] to-[#0063AE] relative z-10" />
+      <div className="h-1 bg-gradient-to-r from-[#0063AE] via-[#004d8a] to-[#0063AE] relative z-10" />
 
       {/* Contenido principal */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 relative z-10">
@@ -181,9 +181,8 @@ export default function Dashboard() {
         >
           {/* Encabezado principal */}
           <motion.div variants={itemVariants} className="text-center mb-14">
-            <h1 className="text-4xl font-extrabold text-gray-800 mb-3 leading-tight">
-              ¿Qué operación deseas
-              <span className="bg-gradient-to-r from-[#0063AE] to-[#FF4081] bg-clip-text text-transparent"> realizar hoy</span>?
+            <h1 className="text-4xl font-extrabold text-black mb-3 leading-tight">
+              ¿Qué operación deseas realizar hoy?
             </h1>
             <p className="text-gray-400 text-base max-w-md mx-auto">
               Selecciona el módulo que corresponde a la operación que deseas gestionar.
@@ -351,7 +350,7 @@ export default function Dashboard() {
               </div>
               <div className="w-px h-4 bg-gray-200" />
               <div className="flex items-center gap-2 text-gray-400 text-xs">
-                <svg className="w-4 h-4 text-[#FF4081]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#0063AE]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Soporte 24/7
