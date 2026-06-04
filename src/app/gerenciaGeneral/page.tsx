@@ -7,6 +7,7 @@ import { API_BASE_URL } from "../../config/api"
 import ContribuyentesPanel from "./contribuyentes/ContribuyentesPanel"
 import GrePanel from "./gre/GrePanel"
 import DeclaracionesPanel from "./declaraciones/DeclaracionesPanel"
+import HelpdeskPanel from "./helpdesk/HelpdeskPanel"
 
 import { fetchWithAuth } from "@/utils/fetchWithAuth"
 
@@ -119,6 +120,18 @@ export default function GerenciaGeneral() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5v-11zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293L9 13.793z"/></svg>
                             Declaraciones
                         </button>
+
+                        <button 
+                            onClick={() => setActiveTab('helpdesk')} 
+                            className={`px-6 py-4 text-left font-extrabold text-sm transition-all flex items-center gap-3
+                                ${activeTab === 'helpdesk' ? 'bg-[#004d8a] border-l-4 border-white' : 'hover:bg-[#00569e] border-l-4 border-transparent text-blue-100'}
+                            `}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 1a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a6 6 0 1 1 12 0v6a2.5 2.5 0 0 1-2.5 2.5H9.366a1 1 0 0 1-.866.5h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 .866.5H11.5A1.5 1.5 0 0 0 13 12h-1a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h1V6a5 5 0 0 0-5-5z"/>
+                            </svg>
+                            Soporte (HelpDesk)
+                        </button>
                     </nav>
                 </div>
 
@@ -152,6 +165,7 @@ export default function GerenciaGeneral() {
                 {activeTab === 'contribuyentes' && <ContribuyentesPanel />}
                 {activeTab === 'gres' && <GrePanel />}
                 {activeTab === 'declaraciones' && <DeclaracionesPanel />}
+                {activeTab === 'helpdesk' && <HelpdeskPanel />}
             </div>
             
             <style jsx global>{`
