@@ -57,6 +57,8 @@ export default function HelpDeskWidget() {
   // Estados Dinámicos (Base de Conocimiento)
   const [dbQuickActions, setDbQuickActions] = useState<string[]>([]);
   const [dbFaqs, setDbFaqs] = useState<any[]>([]);
+  // Ref para evitar stale closure en callbacks asincrónicos
+  const dbFaqsRef = useRef<any[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +67,10 @@ export default function HelpDeskWidget() {
     // Cargar FAQs
     fetch(`${API_BASE_URL}/api/helpdesk/faqs/active`)
       .then(res => res.ok ? res.json() : [])
-      .then(data => setDbFaqs(data))
+      .then(data => {
+        setDbFaqs(data);
+        dbFaqsRef.current = data; // Mantener ref actualizada
+      })
       .catch(console.error);
 
     // Cargar Quick Actions y configurar vista inicial
@@ -252,7 +257,7 @@ export default function HelpDeskWidget() {
     addMessage({ sender: 'user', type: 'text', text: action });
 
     // 1. Verificar si la acción es una FAQ de la Base de Datos
-    const foundFaq = dbFaqs.find(f => f.pregunta === action);
+    const foundFaq = dbFaqsRef.current.find(f => f.pregunta === action);
     if (foundFaq) {
       simulateTyping(() => {
         addMessage({ sender: 'bot', type: 'text', text: foundFaq.respuesta });
@@ -278,14 +283,30 @@ export default function HelpDeskWidget() {
         break;
 
       case "Preguntas Frecuentes":
-        simulateTyping(() => {
-          addMessage({ sender: 'bot', type: 'text', text: "Aquí tienes algunas preguntas comunes:" });
-          const faqOptions = dbFaqs.map(f => f.pregunta);
-          faqOptions.push("Volver al menú principal");
-          addMessage({
-            sender: 'bot', type: 'quick_actions', options: faqOptions
+        setIsTyping(true);
+        fetch(`${API_BASE_URL}/api/helpdesk/faqs/active`)
+          .then(res => res.ok ? res.json() : [])
+          .then(data => {
+            // Actualizar estado y ref con los datos más recientes
+            setDbFaqs(data);
+            dbFaqsRef.current = data;
+            setTimeout(() => {
+              setIsTyping(false);
+              addMessage({ sender: 'bot', type: 'text', text: "Aquí tienes algunas preguntas comunes:" });
+              if (data.length > 0) {
+                const faqOptions = data.map((f: any) => f.pregunta);
+                faqOptions.push("Volver al menú principal");
+                addMessage({ sender: 'bot', type: 'quick_actions', options: faqOptions });
+              } else {
+                addMessage({ sender: 'bot', type: 'text', text: "No hay preguntas frecuentes configuradas aún. ¿Puedo ayudarte en algo más?" });
+                addMessage({ sender: 'bot', type: 'quick_actions', options: ["Registrar Problema", "Consultar Estado de Ticket", "Volver al menú principal"] });
+              }
+            }, 800);
+          })
+          .catch(() => {
+            setIsTyping(false);
+            addMessage({ sender: 'bot', type: 'text', text: "No pude cargar las preguntas en este momento. Intenta más tarde." });
           });
-        });
         break;
 
       case "Ir a Iniciar Sesión":
