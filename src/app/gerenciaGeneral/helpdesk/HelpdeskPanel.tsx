@@ -18,6 +18,13 @@ export default function HelpdeskPanel() {
   const [adminResponse, setAdminResponse] = useState("");
   const [ticketStatusUpdate, setTicketStatusUpdate] = useState("");
 
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const [newFaqPregunta, setNewFaqPregunta] = useState("");
+  const [newFaqRespuesta, setNewFaqRespuesta] = useState("");
+
+  const [isQuickActionModalOpen, setIsQuickActionModalOpen] = useState(false);
+  const [newQuickActionLabel, setNewQuickActionLabel] = useState("");
+
   const fetchData = async () => {
     try {
       const [tRes, fRes, qRes] = await Promise.all([
@@ -78,6 +85,41 @@ export default function HelpdeskPanel() {
         method: 'DELETE'
       });
       if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateFaq = async () => {
+    if (!newFaqPregunta.trim() || !newFaqRespuesta.trim()) return;
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/helpdesk/faqs`, {
+        method: 'POST',
+        body: JSON.stringify({ pregunta: newFaqPregunta, respuesta: newFaqRespuesta, activo: true })
+      });
+      if (res.ok) {
+        setNewFaqPregunta("");
+        setNewFaqRespuesta("");
+        setIsFaqModalOpen(false);
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateQuickAction = async () => {
+    if (!newQuickActionLabel.trim()) return;
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/helpdesk/quick-actions`, {
+        method: 'POST',
+        body: JSON.stringify({ label: newQuickActionLabel, activo: true, orden: quickActions.length + 1 })
+      });
+      if (res.ok) {
+        setNewQuickActionLabel("");
+        setIsQuickActionModalOpen(false);
         fetchData();
       }
     } catch (err) {
@@ -284,7 +326,10 @@ export default function HelpdeskPanel() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                 Editor de Preguntas Frecuentes
               </h3>
-              <button className="bg-[#0063AE] text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm hover:bg-[#004d8a] transition-colors flex items-center gap-1">
+              <button 
+                onClick={() => setIsFaqModalOpen(true)}
+                className="bg-[#0063AE] text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm hover:bg-[#004d8a] transition-colors flex items-center gap-1"
+              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                 Nueva FAQ
               </button>
@@ -311,7 +356,10 @@ export default function HelpdeskPanel() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m13 2-2 2.5-5-1.5 1.5 5-2.5 2 2.5 2-1.5 5 5-1.5 2 2.5 2-2.5 5 1.5-1.5-5 2.5-2-2.5-2 1.5-5-5 1.5Z"/></svg>
                 Quick Actions
               </h3>
-              <button className="text-green-600 bg-green-50 p-1.5 rounded hover:bg-green-100 transition-colors">
+              <button 
+                onClick={() => setIsQuickActionModalOpen(true)}
+                className="text-green-600 bg-green-50 p-1.5 rounded hover:bg-green-100 transition-colors"
+              >
                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
               </button>
             </div>
@@ -427,6 +475,80 @@ export default function HelpdeskPanel() {
               >
                 Guardar y Notificar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL PARA NUEVA FAQ --- */}
+      {isFaqModalOpen && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col animate-scale-in">
+            <div className="bg-[#0063AE] p-4 flex justify-between items-center text-white">
+              <h3 className="font-extrabold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                Crear Nueva FAQ
+              </h3>
+              <button onClick={() => setIsFaqModalOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Pregunta (Label)</label>
+                <input 
+                  type="text" 
+                  value={newFaqPregunta}
+                  onChange={(e) => setNewFaqPregunta(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-[#0063AE] focus:outline-none"
+                  placeholder="Ej. ¿Cómo emito una factura?"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Respuesta del Bot</label>
+                <textarea 
+                  value={newFaqRespuesta}
+                  onChange={(e) => setNewFaqRespuesta(e.target.value)}
+                  className="w-full border border-gray-200 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-[#0063AE] focus:outline-none"
+                  rows={4}
+                  placeholder="Escribe la respuesta detallada que dará el bot..."
+                />
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+              <button onClick={() => setIsFaqModalOpen(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900">Cancelar</button>
+              <button onClick={handleCreateFaq} className="px-6 py-2 bg-[#0063AE] text-white text-sm font-bold rounded-lg hover:bg-[#004d8a] transition-all">Crear FAQ</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL PARA NUEVA QUICK ACTION --- */}
+      {isQuickActionModalOpen && (
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col animate-scale-in">
+            <div className="bg-green-600 p-4 flex justify-between items-center text-white">
+              <h3 className="font-extrabold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m13 2-2 2.5-5-1.5 1.5 5-2.5 2 2.5 2-1.5 5 5-1.5 2 2.5 2-2.5 5 1.5-1.5-5 2.5-2-2.5-2 1.5-5-5 1.5Z"/></svg>
+                Nueva Acción Rápida
+              </h3>
+              <button onClick={() => setIsQuickActionModalOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            <div className="p-5">
+              <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Nombre del Botón</label>
+              <input 
+                type="text" 
+                value={newQuickActionLabel}
+                onChange={(e) => setNewQuickActionLabel(e.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-green-500 focus:outline-none"
+                placeholder="Ej. Problemas de servidor"
+              />
+            </div>
+            <div className="p-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
+              <button onClick={() => setIsQuickActionModalOpen(false)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900">Cancelar</button>
+              <button onClick={handleCreateQuickAction} className="px-6 py-2 bg-green-600 text-white text-sm font-bold rounded-lg hover:bg-green-700 transition-all">Añadir Acción</button>
             </div>
           </div>
         </div>
