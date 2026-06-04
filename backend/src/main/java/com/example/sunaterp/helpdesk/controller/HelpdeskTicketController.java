@@ -8,8 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import com.example.sunaterp.helpdesk.dto.AdminTicketStatusRequestDTO;
+import com.example.sunaterp.helpdesk.entity.HelpdeskTicket;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/helpdesk/tickets")
@@ -50,5 +53,28 @@ public class HelpdeskTicketController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // --- Endpoints Administrativos ---
+    @GetMapping("/all")
+    public ResponseEntity<List<HelpdeskTicket>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.obtenerTodosLosTickets());
+    }
+
+    @PutMapping("/{numeroTicket}/status")
+    public ResponseEntity<HelpdeskTicket> updateTicketStatus(
+            @PathVariable String numeroTicket,
+            @RequestBody AdminTicketStatusRequestDTO request) {
+        
+        HelpdeskTicket updated = ticketService.actualizarEstadoTicket(
+            numeroTicket, 
+            request.getEstado(), 
+            request.getRespuestaAdministrador()
+        );
+        
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

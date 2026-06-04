@@ -1,43 +1,104 @@
 "use client"
-import React, { useState } from 'react';
-
-// --- MOCK DATA ---
-const MOCK_TICKETS = [
-  { id: 'TK-1045', usuario: 'Anon (104593820)', email: 'anon@correo.com', area: 'Soporte Técnico', fecha: '2026-06-04 09:30', estado: 'Pendiente', descripcion: 'No puedo acceder al sistema con mi usuario.' },
-  { id: 'TK-1044', usuario: 'Empresa XYZ', email: 'contacto@xyz.com', area: 'Facturación', fecha: '2026-06-03 15:20', estado: 'En Proceso', descripcion: 'Error al emitir factura electrónica.' },
-  { id: 'TK-1043', usuario: 'Juan Pérez', email: 'juan.p@gmail.com', area: 'Consultas Generales', fecha: '2026-06-03 11:10', estado: 'Resuelto', descripcion: 'Duda sobre el cronograma de obligaciones.' },
-  { id: 'TK-1042', usuario: 'Anon (99382711)', email: 'urgente@empresa.pe', area: 'Soporte Técnico', fecha: '2026-06-02 16:45', estado: 'Resuelto', descripcion: 'Pantalla blanca al intentar declarar.' },
-  { id: 'TK-1041', usuario: 'Consultora ABC', email: 'admin@abc.com.pe', area: 'Facturación', fecha: '2026-06-02 10:05', estado: 'Pendiente', descripcion: 'Diferencia de céntimos en cálculo automático.' },
-];
-
-const MOCK_FAQS = [
-  { id: 1, pregunta: '¿Cómo emito una GRE?', respuesta: 'Para emitir una GRE debes ir al menú Logística > Emisión GRE, completar los datos del remitente, transporte y bienes, y generar el documento.' },
-  { id: 2, pregunta: '¿Cómo declarar impuestos?', respuesta: 'Ingresa a Operaciones > Declaraciones, completa los ingresos y gastos del mes y presiona Declarar y Pagar.' },
-];
-
-const MOCK_QUICK_ACTIONS = [
-  { id: 1, label: 'Registrar Problema', activo: true },
-  { id: 2, label: 'Consultar Estado de Ticket', activo: true },
-  { id: 3, label: 'Preguntas Frecuentes', activo: true },
-  { id: 4, label: 'Contactar Asesor', activo: true },
-  { id: 5, label: 'Problemas de conexión hoy', activo: false },
-];
+import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/config/api';
+import { fetchWithAuth } from '@/utils/fetchWithAuth';
 
 export default function HelpdeskPanel() {
   const [activeSection, setActiveSection] = useState<'tickets' | 'config'>('tickets');
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("Todos");
   
-  // Modal de Gestión de Ticket
+  // Data States
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [quickActions, setQuickActions] = useState<any[]>([]);
+  
+  // Modals / Forms
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [adminResponse, setAdminResponse] = useState("");
+  const [ticketStatusUpdate, setTicketStatusUpdate] = useState("");
+
+  const fetchData = async () => {
+    try {
+      const [tRes, fRes, qRes] = await Promise.all([
+        fetchWithAuth(`${API_BASE_URL}/api/helpdesk/tickets/all`),
+        fetchWithAuth(`${API_BASE_URL}/api/helpdesk/faqs`),
+        fetchWithAuth(`${API_BASE_URL}/api/helpdesk/quick-actions`)
+      ]);
+      if (tRes.ok) setTickets(await tRes.json());
+      if (fRes.ok) setFaqs(await fRes.json());
+      if (qRes.ok) setQuickActions(await qRes.json());
+    } catch (err) {
+      console.error("Error fetching helpdesk data", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleUpdateTicket = async () => {
+    if (!selectedTicket) return;
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/helpdesk/tickets/${selectedTicket.numeroTicket}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          estado: ticketStatusUpdate || selectedTicket.estado,
+          respuestaAdministrador: adminResponse
+        })
+      });
+      if (res.ok) {
+        setSelectedTicket(null);
+        setAdminResponse("");
+        setTicketStatusUpdate("");
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleQuickAction = async (id: number) => {
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/helpdesk/quick-actions/${id}/toggle`, {
+        method: 'PUT'
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteFaq = async (id: number) => {
+    if (!confirm("¿Seguro que deseas eliminar esta FAQ?")) return;
+    try {
+      const res = await fetchWithAuth(`${API_BASE_URL}/api/helpdesk/faqs/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Filtramos los tickets
-  const filteredTickets = MOCK_TICKETS.filter(ticket => {
-    const matchesSearch = ticket.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          ticket.usuario.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTickets = tickets.filter(ticket => {
+    const searchLower = searchTerm.toLowerCase();
+    const idMatches = ticket.numeroTicket?.toLowerCase().includes(searchLower);
+    const userMatches = ticket.usernameAfectado?.toLowerCase().includes(searchLower) || ticket.correoContacto?.toLowerCase().includes(searchLower);
+    const matchesSearch = idMatches || userMatches;
     const matchesStatus = filterStatus === "Todos" || ticket.estado === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const resueltos = tickets.filter(t => t.estado === 'RESUELTO').length;
+  const total = tickets.length;
+  const resolucionPorcentaje = total > 0 ? Math.round((resueltos / total) * 100) : 0;
+  const pendientes = tickets.filter(t => t.estado === 'PENDIENTE').length;
 
   return (
     <div className="p-8 animate-fade-in flex flex-col h-full overflow-hidden relative">
@@ -55,22 +116,17 @@ export default function HelpdeskPanel() {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
             </span>
           </div>
-          <p className="text-4xl font-extrabold text-gray-800 mt-2">1,245</p>
-          <p className="text-xs text-green-600 mt-2 flex items-center font-bold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
-            +12% este mes
-          </p>
+          <p className="text-4xl font-extrabold text-gray-800 mt-2">{total}</p>
         </div>
 
         <div className="bg-white p-6 shadow-sm rounded-lg border-l-4 border-green-500 flex flex-col justify-center">
           <div className="flex items-center justify-between">
-            <h3 className="text-gray-500 font-extrabold text-sm uppercase tracking-wider">Resoluciones Automáticas</h3>
+            <h3 className="text-gray-500 font-extrabold text-sm uppercase tracking-wider">Tasa de Resolución</h3>
             <span className="p-2 bg-green-50 text-green-600 rounded-full">
                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
             </span>
           </div>
-          <p className="text-4xl font-extrabold text-gray-800 mt-2">68%</p>
-          <p className="text-xs text-gray-400 mt-2 font-semibold">Consultas resueltas por el Bot</p>
+          <p className="text-4xl font-extrabold text-gray-800 mt-2">{resolucionPorcentaje}%</p>
         </div>
 
         <div className="bg-white p-6 shadow-sm rounded-lg border-l-4 border-red-500 flex flex-col justify-center">
@@ -80,8 +136,7 @@ export default function HelpdeskPanel() {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </span>
           </div>
-          <p className="text-4xl font-extrabold text-gray-800 mt-2">2</p>
-          <p className="text-xs text-gray-400 mt-2 font-semibold">Requieren atención inmediata</p>
+          <p className="text-4xl font-extrabold text-gray-800 mt-2">{pendientes}</p>
         </div>
       </div>
 
@@ -134,9 +189,9 @@ export default function HelpdeskPanel() {
                 className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-[#0063AE] focus:border-[#0063AE] block w-full p-2 outline-none font-medium"
               >
                 <option value="Todos">Todos los Tickets</option>
-                <option value="Pendiente">Pendiente</option>
-                <option value="En Proceso">En Proceso</option>
-                <option value="Resuelto">Resuelto</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="EN_PROCESO">En Proceso</option>
+                <option value="RESUELTO">Resuelto</option>
               </select>
             </div>
           </div>
@@ -160,24 +215,24 @@ export default function HelpdeskPanel() {
                       <td className="px-6 py-4 font-bold text-gray-900">
                         <div className="flex items-center gap-2">
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#0063AE]"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-                          {ticket.id}
+                          {ticket.numeroTicket}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-bold text-gray-800">{ticket.usuario}</div>
-                        <div className="text-xs text-gray-400">{ticket.email}</div>
+                        <div className="font-bold text-gray-800">{ticket.usernameAfectado}</div>
+                        <div className="text-xs text-gray-400">{ticket.correoContacto}</div>
                       </td>
                       <td className="px-6 py-4 text-gray-600 font-medium">
-                        {ticket.area}
+                        {ticket.areaAsignada}
                       </td>
                       <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                        {ticket.fecha}
+                        {new Date(ticket.fechaCreacion).toLocaleString()}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold border inline-block ${
-                          ticket.estado === 'Resuelto' 
+                          ticket.estado === 'RESUELTO' 
                             ? 'bg-green-100 text-green-800 border-green-200' 
-                            : ticket.estado === 'En Proceso'
+                            : ticket.estado === 'EN_PROCESO'
                             ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
                             : 'bg-red-100 text-red-800 border-red-200'
                         }`}>
@@ -187,7 +242,11 @@ export default function HelpdeskPanel() {
                       <td className="px-6 py-4 text-center">
                         <div className="flex justify-center">
                           <button 
-                            onClick={() => setSelectedTicket(ticket)}
+                            onClick={() => {
+                              setSelectedTicket(ticket);
+                              setAdminResponse(ticket.respuestaAdministrador || "");
+                              setTicketStatusUpdate(ticket.estado);
+                            }}
                             className="text-[#0063AE] hover:text-[#004d8a] font-bold text-sm bg-blue-50 px-4 py-1.5 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
                           >
                             Gestionar
@@ -231,13 +290,12 @@ export default function HelpdeskPanel() {
               </button>
             </div>
             <div className="p-4 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-3">
-              {MOCK_FAQS.map(faq => (
-                <div key={faq.id} className="border border-gray-200 rounded-lg p-4 hover:border-[#0063AE] transition-colors group">
+              {faqs.map(faq => (
+                <div key={faq.id} className={`border ${faq.activo ? 'border-gray-200' : 'border-red-200 bg-red-50/30'} rounded-lg p-4 hover:border-[#0063AE] transition-colors group`}>
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-gray-900 text-sm pr-4">{faq.pregunta}</h4>
+                    <h4 className={`font-bold text-sm pr-4 ${faq.activo ? 'text-gray-900' : 'text-gray-500 line-through'}`}>{faq.pregunta}</h4>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="text-gray-400 hover:text-[#0063AE]"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
-                      <button className="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
+                      <button onClick={() => handleDeleteFaq(faq.id)} className="text-gray-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>
                     </div>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed">{faq.respuesta}</p>
@@ -258,14 +316,19 @@ export default function HelpdeskPanel() {
               </button>
             </div>
             <div className="p-4 overflow-y-auto custom-scrollbar flex-1 flex flex-col gap-2">
-              {MOCK_QUICK_ACTIONS.map(action => (
+              {quickActions.map(action => (
                 <div key={action.id} className={`flex justify-between items-center p-3 rounded-lg border ${action.activo ? 'border-green-200 bg-green-50/30' : 'border-gray-200 bg-gray-50'} transition-all`}>
                   <span className={`text-sm font-bold ${action.activo ? 'text-gray-800' : 'text-gray-400'}`}>
                     {action.label}
                   </span>
                   {/* Toggle Switch Simple */}
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked={action.activo} />
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={action.activo} 
+                      onChange={() => handleToggleQuickAction(action.id)}
+                    />
                     <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
                   </label>
                 </div>
@@ -284,9 +347,9 @@ export default function HelpdeskPanel() {
               <div>
                 <h3 className="font-extrabold text-lg flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-                  Gestión del Ticket: {selectedTicket.id}
+                  Gestión del Ticket: {selectedTicket.numeroTicket}
                 </h3>
-                <p className="text-xs text-blue-200 mt-1">Registrado el {selectedTicket.fecha}</p>
+                <p className="text-xs text-blue-200 mt-1">Registrado el {new Date(selectedTicket.fechaCreacion).toLocaleString()}</p>
               </div>
               <button 
                 onClick={() => setSelectedTicket(null)}
@@ -300,19 +363,19 @@ export default function HelpdeskPanel() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                   <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">Usuario / Afectado</span>
-                  <span className="text-sm font-bold text-gray-800 block">{selectedTicket.usuario}</span>
-                  <span className="text-xs text-[#0063AE]">{selectedTicket.email}</span>
+                  <span className="text-sm font-bold text-gray-800 block">{selectedTicket.usernameAfectado}</span>
+                  <span className="text-xs text-[#0063AE]">{selectedTicket.correoContacto}</span>
                 </div>
                 <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
                   <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">Estado Actual</span>
                   <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold border inline-block mt-1 ${
-                    selectedTicket.estado === 'Resuelto' 
+                    ticketStatusUpdate === 'RESUELTO' 
                       ? 'bg-green-100 text-green-800 border-green-200' 
-                      : selectedTicket.estado === 'En Proceso'
+                      : ticketStatusUpdate === 'EN_PROCESO'
                       ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
                       : 'bg-red-100 text-red-800 border-red-200'
                   }`}>
-                    {selectedTicket.estado}
+                    {ticketStatusUpdate}
                   </span>
                 </div>
               </div>
@@ -327,15 +390,23 @@ export default function HelpdeskPanel() {
               <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                  <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-3">Actualizar Estado</span>
                  <div className="flex gap-2">
-                    <button className="flex-1 bg-red-50 text-red-700 font-bold text-xs py-2 rounded-lg border border-red-100 hover:bg-red-100 transition-colors">Pendiente</button>
-                    <button className="flex-1 bg-yellow-50 text-yellow-700 font-bold text-xs py-2 rounded-lg border border-yellow-100 hover:bg-yellow-100 transition-colors">En Proceso</button>
-                    <button className="flex-1 bg-green-50 text-green-700 font-bold text-xs py-2 rounded-lg border border-green-100 hover:bg-green-100 transition-colors">Resuelto</button>
+                    <button 
+                      onClick={() => setTicketStatusUpdate('PENDIENTE')}
+                      className={`flex-1 font-bold text-xs py-2 rounded-lg border transition-colors ${ticketStatusUpdate === 'PENDIENTE' ? 'bg-red-500 text-white border-red-600' : 'bg-red-50 text-red-700 border-red-100 hover:bg-red-100'}`}>Pendiente</button>
+                    <button 
+                      onClick={() => setTicketStatusUpdate('EN_PROCESO')}
+                      className={`flex-1 font-bold text-xs py-2 rounded-lg border transition-colors ${ticketStatusUpdate === 'EN_PROCESO' ? 'bg-yellow-500 text-white border-yellow-600' : 'bg-yellow-50 text-yellow-700 border-yellow-100 hover:bg-yellow-100'}`}>En Proceso</button>
+                    <button 
+                      onClick={() => setTicketStatusUpdate('RESUELTO')}
+                      className={`flex-1 font-bold text-xs py-2 rounded-lg border transition-colors ${ticketStatusUpdate === 'RESUELTO' ? 'bg-green-500 text-white border-green-600' : 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100'}`}>Resuelto</button>
                  </div>
               </div>
 
               <div className="pt-2">
                 <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-2">Respuesta al Usuario</label>
                 <textarea 
+                  value={adminResponse}
+                  onChange={(e) => setAdminResponse(e.target.value)}
                   className="w-full text-sm text-black border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-[#0063AE]"
                   rows={3}
                   placeholder="Escribe la solución para enviar al correo del usuario..."
@@ -350,7 +421,10 @@ export default function HelpdeskPanel() {
               >
                 Cancelar
               </button>
-              <button className="px-6 py-2 bg-gradient-to-r from-[#0063AE] to-[#004d8a] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg hover:from-[#00569e] hover:to-[#004073] transition-all">
+              <button 
+                onClick={handleUpdateTicket}
+                className="px-6 py-2 bg-gradient-to-r from-[#0063AE] to-[#004d8a] text-white text-sm font-bold rounded-lg shadow-md hover:shadow-lg hover:from-[#00569e] hover:to-[#004073] transition-all"
+              >
                 Guardar y Notificar
               </button>
             </div>

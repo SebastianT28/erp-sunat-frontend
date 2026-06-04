@@ -8,6 +8,7 @@ import com.example.sunaterp.helpdesk.repository.HelpdeskTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -40,6 +41,22 @@ public class HelpdeskTicketService {
         return ticketRepository.findByNumeroTicket(numeroTicket)
                 .map(t -> new TicketResponseDTO(t.getNumeroTicket(), t.getEstado(), t.getAreaAsignada(), t.getDescripcion()))
                 .orElse(null);
+    }
+
+    public List<HelpdeskTicket> obtenerTodosLosTickets() {
+        return ticketRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "fechaCreacion"));
+    }
+
+    public HelpdeskTicket actualizarEstadoTicket(String numeroTicket, String nuevoEstado, String respuesta) {
+        return ticketRepository.findByNumeroTicket(numeroTicket).map(ticket -> {
+            if (nuevoEstado != null && !nuevoEstado.trim().isEmpty()) {
+                ticket.setEstado(nuevoEstado);
+            }
+            if (respuesta != null) {
+                ticket.setRespuestaAdministrador(respuesta);
+            }
+            return ticketRepository.save(ticket);
+        }).orElse(null);
     }
 
     private TicketResponseDTO guardarYGenerarRespuesta(HelpdeskTicket ticket) {

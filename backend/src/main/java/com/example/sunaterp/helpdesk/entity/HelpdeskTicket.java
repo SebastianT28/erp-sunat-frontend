@@ -27,6 +27,9 @@ public class HelpdeskTicket {
     private String estado; // PENDIENTE, EN_PROCESO, RESUELTO
     private String areaAsignada;
 
+    @Column(columnDefinition = "TEXT")
+    private String respuestaAdministrador;
+
     private LocalDateTime fechaCreacion;
 
     @PrePersist
@@ -64,4 +67,7 @@ public class HelpdeskTicket {
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public String getRespuestaAdministrador() { return respuestaAdministrador; }
+    public void setRespuestaAdministrador(String respuestaAdministrador) { this.respuestaAdministrador = respuestaAdministrador; }
 }

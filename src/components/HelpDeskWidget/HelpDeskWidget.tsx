@@ -36,25 +36,11 @@ const Icons = {
   )
 };
 
-const INITIAL_QUICK_ACTIONS = [
-  "Registrar Problema",
-  "Consultar Estado de Ticket",
-  "Preguntas Frecuentes",
-  "Contactar Asesor"
-];
-
 const INITIAL_MESSAGE: Message = {
   id: 'init-1',
   sender: 'bot',
   type: 'text',
   text: '¡Hola! Soy Suny Bot, tu Asistente Virtual Inteligente del ERP SUNAT. ¿En qué te puedo ayudar hoy?'
-};
-
-const INITIAL_ACTIONS: Message = {
-  id: 'init-2',
-  sender: 'bot',
-  type: 'quick_actions',
-  options: INITIAL_QUICK_ACTIONS
 };
 
 export default function HelpDeskWidget() {
@@ -68,32 +54,54 @@ export default function HelpDeskWidget() {
   const [anonEmail, setAnonEmail] = useState("");
   const pathname = usePathname();
 
+  // Estados Dinámicos (Base de Conocimiento)
+  const [dbQuickActions, setDbQuickActions] = useState<string[]>([]);
+  const [dbFaqs, setDbFaqs] = useState<any[]>([]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Inicializar estado según cookies y ruta
+  // Inicializar estado y cargar BD
   useEffect(() => {
-    const cookies = document.cookie.split(';');
-    const hasToken = cookies.some(c => c.trim().startsWith('auth_token='));
-    setIsLoggedIn(hasToken);
+    // Cargar FAQs
+    fetch(`${API_BASE_URL}/api/helpdesk/faqs/active`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setDbFaqs(data))
+      .catch(console.error);
 
-    if (hasToken) {
-      setMessages([INITIAL_MESSAGE, INITIAL_ACTIONS]);
-    } else {
-      setMessages([
-        {
-          id: 'init-anon-1',
-          sender: 'bot',
-          type: 'text',
-          text: '¡Hola! Soy Suny Bot. Por favor, **inicie sesión** para poder mostrarte todas las opciones o poder ayudarte de forma personalizada.'
-        },
-        {
-          id: 'init-anon-2',
-          sender: 'bot',
-          type: 'quick_actions',
-          options: ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"]
+    // Cargar Quick Actions y configurar vista inicial
+    fetch(`${API_BASE_URL}/api/helpdesk/quick-actions/active`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        const actions = data.length > 0 ? data.map((a: any) => a.label) : ["Registrar Problema", "Consultar Estado de Ticket", "Preguntas Frecuentes", "Contactar Asesor"];
+        setDbQuickActions(actions);
+        
+        const cookies = document.cookie.split(';');
+        const hasToken = cookies.some(c => c.trim().startsWith('auth_token='));
+        setIsLoggedIn(hasToken);
+
+        if (hasToken) {
+          setMessages([
+            INITIAL_MESSAGE,
+            { id: 'init-2', sender: 'bot', type: 'quick_actions', options: actions }
+          ]);
+        } else {
+          setMessages([
+            {
+              id: 'init-anon-1',
+              sender: 'bot',
+              type: 'text',
+              text: '¡Hola! Soy Suny Bot. Por favor, **inicie sesión** para poder mostrarte todas las opciones o poder ayudarte de forma personalizada.'
+            },
+            {
+              id: 'init-anon-2',
+              sender: 'bot',
+              type: 'quick_actions',
+              options: ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"]
+            }
+          ]);
         }
-      ]);
-    }
+      })
+      .catch(console.error);
   }, [pathname]);
 
   // Auto-scroll al último mensaje
@@ -236,13 +244,24 @@ export default function HelpDeskWidget() {
     // Respuesta genérica por defecto
     simulateTyping(() => {
       addMessage({ sender: 'bot', type: 'text', text: "No entendí muy bien tu solicitud. Por favor, selecciona una de las siguientes opciones:" });
-      addMessage({ sender: 'bot', type: 'quick_actions', options: INITIAL_QUICK_ACTIONS });
+      addMessage({ sender: 'bot', type: 'quick_actions', options: dbQuickActions.length > 0 ? dbQuickActions : ["Registrar Problema", "Consultar Estado de Ticket"] });
     });
   };
 
   const handleQuickAction = (action: string) => {
     addMessage({ sender: 'user', type: 'text', text: action });
 
+    // 1. Verificar si la acción es una FAQ de la Base de Datos
+    const foundFaq = dbFaqs.find(f => f.pregunta === action);
+    if (foundFaq) {
+      simulateTyping(() => {
+        addMessage({ sender: 'bot', type: 'text', text: foundFaq.respuesta });
+        setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
+      });
+      return;
+    }
+
+    // 2. Procesar flujos principales
     switch (action) {
       case "Registrar Problema":
         simulateTyping(() => {
@@ -261,28 +280,11 @@ export default function HelpDeskWidget() {
       case "Preguntas Frecuentes":
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "Aquí tienes algunas preguntas comunes:" });
+          const faqOptions = dbFaqs.map(f => f.pregunta);
+          faqOptions.push("Volver al menú principal");
           addMessage({
-            sender: 'bot', type: 'quick_actions', options: [
-              "¿Cómo emito una GRE?",
-              "He olvidado mi contraseña",
-              "¿Cómo declarar impuestos?",
-              "Volver al menú principal"
-            ]
+            sender: 'bot', type: 'quick_actions', options: faqOptions
           });
-        });
-        break;
-
-      case "¿Cómo emito una GRE?":
-        simulateTyping(() => {
-          addMessage({ sender: 'bot', type: 'text', text: "Para emitir una GRE debes ir al menú Logística > Emisión GRE, completar los datos del remitente, transporte y bienes, y generar el documento." });
-          setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
-        });
-        break;
-
-      case "¿Cómo declarar impuestos?":
-        simulateTyping(() => {
-          addMessage({ sender: 'bot', type: 'text', text: "El proceso de declaración mensual consta de los siguientes pasos:\n\n1. Ingresa a la sección **Operaciones > Declaraciones**.\n2. Completa el **Formulario de Ingresos** registrando tus ventas brutas del mes.\n3. Completa el **Formulario de Gastos** registrando tus compras vinculadas a tu negocio.\n4. El sistema calculará automáticamente el IGV y el Impuesto a la Renta a pagar.\n5. Finalmente, presiona **Declarar y Pagar**." });
-          setTimeout(() => addMessage({ sender: 'bot', type: 'quick_actions', options: ["Volver al menú principal"] }), 500);
         });
         break;
 
@@ -328,7 +330,8 @@ export default function HelpDeskWidget() {
         setChatState('idle');
         simulateTyping(() => {
           addMessage({ sender: 'bot', type: 'text', text: "¿En qué más te puedo ayudar?" });
-          addMessage({ sender: 'bot', type: 'quick_actions', options: isLoggedIn ? INITIAL_QUICK_ACTIONS : ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"] });
+          const defaultActions = dbQuickActions.length > 0 ? dbQuickActions : ["Registrar Problema", "Consultar Estado de Ticket"];
+          addMessage({ sender: 'bot', type: 'quick_actions', options: isLoggedIn ? defaultActions : ["Ir a Iniciar Sesión", "Tengo problemas al iniciar sesión"] });
         });
         break;
 
