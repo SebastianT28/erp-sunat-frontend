@@ -93,7 +93,7 @@ export default function EmisionGRE() {
       } else {
         setModalNombre("")
         setEncontrado(false)
-        setMensajeBusqueda("No se encontró destinatario con ese documento!!")
+        setMensajeBusqueda("No se encontró destinatario con ese documento!")
       }
     } catch {
       setModalNombre("")
