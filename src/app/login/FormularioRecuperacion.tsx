@@ -6,17 +6,19 @@ interface Props {
   onBack: () => void;
 }
 
+//Comentario de prueba para Scrum-8
+
 export default function FormularioRecuperacion({ onBack }: Props) {
   const [paso, setPaso] = useState<"selector" | "usuario" | "password_email" | "password_otp" | "password_new">("selector");
   const [correo, setCorreo] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [nuevaPassword, setNuevaPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleRecuperarUsuario = async () => {
@@ -35,7 +37,7 @@ export default function FormularioRecuperacion({ onBack }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al recuperar usuario");
-      
+
       setSuccessMsg(data.mensaje);
       setCorreo("");
     } catch (err: any) {
@@ -61,7 +63,7 @@ export default function FormularioRecuperacion({ onBack }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al solicitar restablecimiento");
-      
+
       setSuccessMsg(data.mensaje);
       setPaso("password_otp");
       setTimeout(() => inputRefs.current[0]?.focus(), 100);
@@ -94,7 +96,7 @@ export default function FormularioRecuperacion({ onBack }: Props) {
       const res = await fetch(`${API_BASE_URL}/api/auth/cambiar-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           correo: correo.trim(),
           codigo_otp: codigo,
           nueva_password: nuevaPassword
@@ -102,7 +104,7 @@ export default function FormularioRecuperacion({ onBack }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al cambiar contraseña");
-      
+
       setSuccessMsg(data.mensaje);
       setPaso("selector");
     } catch (err: any) {
