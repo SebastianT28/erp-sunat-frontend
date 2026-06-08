@@ -127,7 +127,7 @@ export default function HelpDeskWidget() {
     }, delay);
   };
 
-  const handleSendText = (e?: React.FormEvent) => {
+  const handleSendText = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim()) return;
 
@@ -246,11 +246,46 @@ export default function HelpDeskWidget() {
       return;
     }
 
-    // Respuesta genérica por defecto
-    simulateTyping(() => {
-      addMessage({ sender: 'bot', type: 'text', text: "No entendí muy bien tu solicitud. Por favor, selecciona una de las siguientes opciones:" });
+    // Respuesta inteligente con Gemini AI (estado idle)
+    setIsTyping(true);
+    try {
+      // Tomar los últimos 10 mensajes de texto como historial de contexto
+      const recentHistory = messages
+        .filter(m => m.type === 'text' && m.text)
+        .slice(-10)
+        .map(m => ({ role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model', text: m.text! }));
+
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userText, history: recentHistory }),
+      });
+
+      const data = await res.json();
+      setIsTyping(false);
+
+      addMessage({ sender: 'bot', type: 'text', text: data.reply });
+
+      if (data.action === 'create_ticket') {
+        setTimeout(() => addMessage({
+          sender: 'bot',
+          type: 'quick_actions',
+          options: ["Registrar Problema", "Volver al menú principal"],
+        }), 500);
+      } else if (data.action === 'contact_advisor') {
+        // Sin opciones adicionales: el mensaje de la IA ya informa al usuario
+      } else {
+        setTimeout(() => addMessage({
+          sender: 'bot',
+          type: 'quick_actions',
+          options: ["Volver al menú principal"],
+        }), 500);
+      }
+    } catch {
+      setIsTyping(false);
+      addMessage({ sender: 'bot', type: 'text', text: "Disculpa, tuve un problema al procesar tu consulta. Por favor, intenta de nuevo o usa las opciones del menú." });
       addMessage({ sender: 'bot', type: 'quick_actions', options: dbQuickActions.length > 0 ? dbQuickActions : ["Registrar Problema", "Consultar Estado de Ticket"] });
-    });
+    }
   };
 
   const handleQuickAction = (action: string) => {
