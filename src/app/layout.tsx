@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"; //prueba de logs
 import { Spectral, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
