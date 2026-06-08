@@ -11,7 +11,7 @@ const ROUTE_ROLES: Record<string, string[]> = {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   const token = request.cookies.get('auth_token')?.value;
   const rolCookie = request.cookies.get('auth_rol')?.value;
   // Normalizamos el rol a minúsculas por seguridad si existe

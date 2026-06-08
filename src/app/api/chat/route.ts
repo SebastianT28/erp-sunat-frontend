@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }));
 
     const chat = ai.chats.create({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3.5-flash',
       config: {
         systemInstruction: SYSTEM_PROMPT,
         temperature: 0.4,
