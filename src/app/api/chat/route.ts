@@ -68,7 +68,8 @@ export async function POST(request: NextRequest) {
       config: {
         systemInstruction: SYSTEM_PROMPT,
         temperature: 0.4,
-        maxOutputTokens: 512,
+        maxOutputTokens: 1024,
+        responseMimeType: 'application/json',
       },
       history: chatHistory,
     });
@@ -89,8 +90,7 @@ export async function POST(request: NextRequest) {
         action = parsed.action;
       }
     } catch {
-      // Si el JSON falla, usar el texto tal cual como respuesta
-      if (rawText.trim()) reply = rawText.trim();
+      // Si el JSON falla (muy raro con responseMimeType json), devolvemos el fallback por defecto
     }
 
     return NextResponse.json({ reply, action });
