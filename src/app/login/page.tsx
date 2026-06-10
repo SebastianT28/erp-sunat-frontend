@@ -204,19 +204,21 @@ export default function Login() {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex justify-between mt-8 items-end">
-              <div className="flex flex-col items-center">
-                <p className="text-sm text-black mb-2 font-extrabold">
-                  ¿No estás registrado?
-                </p>
-                <button
-                  type="button"
-                  onClick={handleRegister}
-                  className="bg-[#0063AE] text-white px-5 py-2.5 shadow font-extrabold"
-                >
-                  Crear Cuenta
-                </button>
-              </div>
+            <div className={`flex mt-8 items-end ${tipo === "usuario" ? "justify-between" : "justify-end"}`}>
+              {tipo === "usuario" && (
+                <div className="flex flex-col items-center">
+                  <p className="text-sm text-black mb-2 font-extrabold">
+                    ¿No estás registrado?
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRegister}
+                    className="bg-[#0063AE] text-white px-5 py-2.5 shadow font-extrabold"
+                  >
+                    Crear Cuenta
+                  </button>
+                </div>
+              )}
 
               <button
                 type="button"
