@@ -1,0 +1,17 @@
+name: Keep Backend Alive
+
+on:
+  schedule:
+    # Se ejecuta cada 14 minutos para evitar que Render apague el servidor (límite de inactividad de 15 min)
+    - cron: "*/14 * * * *"
+  workflow_dispatch: # Permite ejecutar el bot manualmente desde GitHub si es necesario
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hacer ping al backend en Render
+        run: |
+          echo "Haciendo petición al backend para mantenerlo despierto..."
+          curl -sS ${{ secrets.RENDER_BACKEND_URL }}/api/helpdesk/quick-actions/active > /dev/null
+          echo "¡Ping completado con éxito!"
