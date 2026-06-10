@@ -10,12 +10,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import com.example.sunaterp.config.EmailService;
 
 @Service
 public class HelpdeskTicketService {
 
     @Autowired
     private HelpdeskTicketRepository ticketRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     public TicketResponseDTO crearTicketPublico(PublicTicketRequestDTO dto) {
         HelpdeskTicket ticket = new HelpdeskTicket();
@@ -49,13 +54,37 @@ public class HelpdeskTicketService {
 
     public HelpdeskTicket actualizarEstadoTicket(String numeroTicket, String nuevoEstado, String respuesta) {
         return ticketRepository.findByNumeroTicket(numeroTicket).map(ticket -> {
+            boolean notificar = false;
+            
             if (nuevoEstado != null && !nuevoEstado.trim().isEmpty()) {
                 ticket.setEstado(nuevoEstado);
             }
-            if (respuesta != null) {
+            if (respuesta != null && !respuesta.trim().isEmpty() && !respuesta.equals(ticket.getRespuestaAdministrador())) {
                 ticket.setRespuestaAdministrador(respuesta);
+                notificar = true;
             }
-            return ticketRepository.save(ticket);
+            
+            HelpdeskTicket guardado = ticketRepository.save(ticket);
+            
+            if (notificar && ticket.getCorreoContacto() != null && !ticket.getCorreoContacto().isEmpty()) {
+                String destinatario = ticket.getCorreoContacto();
+                String asunto = "Respuesta a tu Ticket " + numeroTicket + " - ERP SUNAT";
+                String contenido = "Hola,\\n\\n" +
+                        "Tu ticket " + numeroTicket + " ha sido actualizado por nuestro equipo.\\n\\n" +
+                        "Respuesta del administrador:\\n" + respuesta + "\\n\\n" +
+                        "Estado actual: " + ticket.getEstado() + "\\n\\n" +
+                        "Atentamente,\\nEquipo de Soporte ERP SUNAT";
+                
+                CompletableFuture.runAsync(() -> {
+                    try {
+                        emailService.enviarCorreo(destinatario, asunto, contenido);
+                    } catch (Exception e) {
+                        System.err.println("No se pudo enviar correo al ticket " + numeroTicket + ": " + e.getMessage());
+                    }
+                });
+            }
+            
+            return guardado;
         }).orElse(null);
     }
 
