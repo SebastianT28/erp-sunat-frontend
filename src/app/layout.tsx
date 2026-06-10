@@ -1,4 +1,5 @@
 import type { Metadata } from "next"; //prueba de logs
+import dynamic from 'next/dynamic';
 import { Spectral, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -20,11 +21,7 @@ export const metadata: Metadata = {
   description: "Sistema Web de Servicios Administrativos y Contables",
 };
 
-import dynamic from 'next/dynamic';
-
-const HelpDeskWidget = dynamic(() => import('@/components/HelpDeskWidget/HelpDeskWidget'), {
-  ssr: false,
-});
+const HelpDeskWidget = dynamic(() => import('@/components/HelpDeskWidget/HelpDeskWidget'));
 
 export default function RootLayout({
   children,
