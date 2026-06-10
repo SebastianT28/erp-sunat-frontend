@@ -68,16 +68,31 @@ public class HelpdeskTicketService {
             
             if (notificar && ticket.getCorreoContacto() != null && !ticket.getCorreoContacto().isEmpty()) {
                 String destinatario = ticket.getCorreoContacto();
-                String asunto = "Respuesta a tu Ticket " + numeroTicket + " - ERP SUNAT";
-                String contenido = "Hola,\\n\\n" +
-                        "Tu ticket " + numeroTicket + " ha sido actualizado por nuestro equipo.\\n\\n" +
-                        "Respuesta del administrador:\\n" + respuesta + "\\n\\n" +
-                        "Estado actual: " + ticket.getEstado() + "\\n\\n" +
-                        "Atentamente,\\nEquipo de Soporte ERP SUNAT";
+                String asunto = "Actualización de tu Ticket " + numeroTicket + " - ERP SUNAT";
+                
+                String colorEstado = ticket.getEstado().equalsIgnoreCase("RESUELTO") ? "#10B981" : "#F59E0B";
+                
+                String contenidoHtml = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);\">" +
+                        "<div style=\"background-color: #0063AE; color: white; padding: 25px; text-align: center;\">" +
+                        "<h2 style=\"margin: 0; font-size: 22px;\">ERP SUNAT - Soporte y Ayuda</h2>" +
+                        "</div>" +
+                        "<div style=\"padding: 30px; background-color: #ffffff;\">" +
+                        "<h3 style=\"color: #1f2937; margin-top: 0;\">¡Hola!</h3>" +
+                        "<p style=\"color: #4b5563; line-height: 1.6; font-size: 15px;\">Tu ticket <strong>" + numeroTicket + "</strong> acaba de ser revisado y actualizado por un agente de nuestro equipo.</p>" +
+                        "<div style=\"background-color: #f8fafc; border-left: 4px solid #0063AE; padding: 18px; margin: 25px 0; border-radius: 0 4px 4px 0;\">" +
+                        "<p style=\"margin: 0 0 10px 0; color: #1e293b; font-size: 14px; text-transform: uppercase; font-weight: bold;\">Respuesta del Administrador:</p>" +
+                        "<p style=\"margin: 0; color: #334155; line-height: 1.5; font-size: 15px;\">" + respuesta.replace("\n", "<br>") + "</p>" +
+                        "</div>" +
+                        "<p style=\"margin: 0; color: #4b5563; font-size: 15px;\">Estado del ticket: <span style=\"background-color: " + colorEstado + "; color: white; padding: 4px 10px; border-radius: 9999px; font-weight: bold; font-size: 12px; margin-left: 5px; display: inline-block;\">" + ticket.getEstado().replace("_", " ") + "</span></p>" +
+                        "</div>" +
+                        "<div style=\"background-color: #f1f5f9; padding: 20px; text-align: center; color: #64748b; font-size: 13px; border-top: 1px solid #e2e8f0;\">" +
+                        "<p style=\"margin: 0;\">Atentamente,<br><strong style=\"color: #475569; margin-top: 4px; display: inline-block;\">Equipo de Soporte ERP SUNAT</strong></p>" +
+                        "</div>" +
+                        "</div>";
                 
                 CompletableFuture.runAsync(() -> {
                     try {
-                        emailService.enviarCorreo(destinatario, asunto, contenido);
+                        emailService.enviarCorreoHtml(destinatario, asunto, contenidoHtml);
                     } catch (Exception e) {
                         System.err.println("No se pudo enviar correo al ticket " + numeroTicket + ": " + e.getMessage());
                     }

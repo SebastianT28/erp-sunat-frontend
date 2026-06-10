@@ -60,4 +60,36 @@ public class EmailService {
                 .replace("\r", "\\r")
                 .replace("\t", "\\t");
     }
+
+    public void enviarCorreoHtml(String destinatario, String asunto, String contenidoHtml) {
+        try {
+            String jsonBody = "{" +
+                    "\"from\":\"" + escapeJson(fromEmail) + "\"," +
+                    "\"to\":[\"" + escapeJson(destinatario) + "\"]," +
+                    "\"subject\":\"" + escapeJson(asunto) + "\"," +
+                    "\"html\":\"" + escapeJson(contenidoHtml) + "\"" +
+                    "}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.resend.com/emails"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                throw new RuntimeException("Error Resend API (HTTP " + response.statusCode() + "): " + response.body());
+            }
+
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Envío de correo HTML interrumpido", e);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al enviar correo HTML: " + e.getMessage(), e);
+        }
+    }
 }
