@@ -64,6 +64,7 @@ export default function HelpDeskWidget() {
 
   // Inicializar estado y cargar BD
   useEffect(() => {
+    setIsTyping(true); // Activa la animación "escribiendo"
     // Cargar FAQs
     fetch(`${API_BASE_URL}/api/helpdesk/faqs/active`)
       .then(res => res.ok ? res.json() : [])
@@ -79,7 +80,7 @@ export default function HelpDeskWidget() {
       .then(data => {
         const actions = data.length > 0 ? data.map((a: any) => a.label) : ["Registrar Problema", "Consultar Estado de Ticket", "Preguntas Frecuentes", "Contactar Asesor"];
         setDbQuickActions(actions);
-        
+
         const cookies = document.cookie.split(';');
         const hasToken = cookies.some(c => c.trim().startsWith('auth_token='));
         setIsLoggedIn(hasToken);
@@ -105,8 +106,12 @@ export default function HelpDeskWidget() {
             }
           ]);
         }
+        setIsTyping(false); // Detiene la animación al cargar
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        setIsTyping(false); // Detiene la animación si hay error
+      });
   }, [pathname]);
 
   // Auto-scroll al último mensaje

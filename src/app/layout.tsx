@@ -20,7 +20,11 @@ export const metadata: Metadata = {
   description: "Sistema Web de Servicios Administrativos y Contables",
 };
 
-import HelpDeskWidget from "@/components/HelpDeskWidget/HelpDeskWidget";
+import dynamic from 'next/dynamic';
+
+const HelpDeskWidget = dynamic(() => import('@/components/HelpDeskWidget/HelpDeskWidget'), {
+  ssr: false,
+});
 
 export default function RootLayout({
   children,
