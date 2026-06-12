@@ -21,6 +21,6 @@ jobs:
       with:
         filename: performance-tests/stress-test.js
         flags: --out cloud
+        token: ${{ secrets.K6_CLOUD_TOKEN }}
       env:
         TARGET_URL: ${{ github.event.inputs.target_url }}
-        K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}

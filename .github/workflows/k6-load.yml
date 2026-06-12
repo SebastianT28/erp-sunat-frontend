@@ -36,8 +36,8 @@ jobs:
       with:
         filename: performance-tests/load-test.js
         flags: --out cloud
+        token: ${{ secrets.K6_CLOUD_TOKEN }}
       env:
         # Usamos la IP de la red bridge de docker (172.17.0.1) para que k6 (que corre en un contenedor)
         # pueda comunicarse con el servidor Next.js que corre en el host (el runner de GitHub Actions).
         TARGET_URL: 'http://172.17.0.1:3000'
-        K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
