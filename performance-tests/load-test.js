@@ -3,6 +3,12 @@ import { check, sleep } from 'k6';
 
 // Configuración de la prueba de carga
 export const options = {
+  ext: {
+    loadimpact: {
+      projectID: 7793471,
+      name: 'Load Test - ERP Local',
+    }
+  },
   stages: [
     { duration: '15s', target: 50 }, // Rampa de subida: 50 usuarios en 15 segundos
     { duration: '1m', target: 50 },  // Mantenimiento: 50 usuarios por 1 minuto

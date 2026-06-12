@@ -3,6 +3,12 @@ import { check, sleep } from 'k6';
 
 // Configuración de la prueba de estrés por etapas (stages)
 export const options = {
+  ext: {
+    loadimpact: {
+      projectID: 7793471,
+      name: 'Stress Test - ERP Vercel',
+    }
+  },
   stages: [
     { duration: '1m', target: 100 },  // Etapa 1: Subir a 100 usuarios y mantener
     { duration: '1m', target: 300 },  // Etapa 2: Subir a 300 usuarios y mantener
