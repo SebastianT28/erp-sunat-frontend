@@ -10,10 +10,10 @@ export const options = {
     }
   },
   stages: [
-    { duration: '1m', target: 100 },  // Etapa 1: Subir a 100 usuarios y mantener
-    { duration: '1m', target: 300 },  // Etapa 2: Subir a 300 usuarios y mantener
-    { duration: '1m', target: 600 },  // Etapa 3: Subir a 600 usuarios y mantener
-    { duration: '1m', target: 1000 }, // Etapa 4: Subir a 1000 usuarios y mantener
+    { duration: '1m', target: 25 },   // Etapa 1: Subir a 25 usuarios
+    { duration: '1m', target: 50 },   // Etapa 2: Subir a 50 usuarios
+    { duration: '1m', target: 75 },   // Etapa 3: Subir a 75 usuarios
+    { duration: '1m', target: 100 },  // Etapa 4: Subir al límite de Grafana (100 VUs)
     { duration: '1m', target: 0 },    // Etapa 5: Bajar a 0 usuarios
   ],
   // No configuramos thresholds estrictos para que la prueba no aborte 
@@ -38,6 +38,6 @@ export default function () {
     'estado es 200': (r) => r.status === 200,
   });
 
-  // Pausa corta de 1 segundo
-  sleep(1);
+  // Pausa muy corta (0.1s) para que esos 100 usuarios generen una lluvia masiva de peticiones
+  sleep(0.1);
 }
