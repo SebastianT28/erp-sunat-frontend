@@ -1,0 +1,65 @@
+name: K6 API Stress Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  api-stress-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: rootpassword
+          POSTGRES_DB: erp_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Build Backend (Spring Boot)
+      run: |
+        cd backend
+        ./mvnw clean package -DskipTests
+      
+    - name: Start Spring Boot Application
+      env:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/erp_test_db
+        SPRING_DATASOURCE_USERNAME: root
+        SPRING_DATASOURCE_PASSWORD: rootpassword
+        # Desactivamos logs verbosos para que no saturen la consola de GitHub Actions
+        LOGGING_LEVEL_ROOT: WARN
+      run: |
+        cd backend
+        java -jar target/demo-0.0.1-SNAPSHOT.jar &
+        
+        echo "Esperando a que Spring Boot inicie en el puerto 8080..."
+        # Esperar a que el puerto TCP 8080 esté abierto y respondiendo
+        npx wait-on tcp:8080 -t 90000
+        echo "Spring Boot iniciado y listo para recibir peticiones."
+        
+    - name: Run k6 API stress test
+      uses: grafana/k6-action@v0.3.1
+      with:
+        filename: performance-tests/api-stress-test.js
+        flags: --out cloud
+        token: ${{ secrets.K6_CLOUD_TOKEN }}
+      env:
+        # Usamos 172.17.0.1 (IP del Docker bridge) para que k6 (en su contenedor) pueda acceder a Spring Boot en el host
+        TARGET_URL: 'http://172.17.0.1:8080'
