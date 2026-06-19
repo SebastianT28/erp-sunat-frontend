@@ -55,7 +55,9 @@ export default function () {
 
       if (numeroTicket) {
         // Consultar el estado del ticket recién creado
-        const getRes = http.get(`${BASE_URL}/api/helpdesk/tickets/status/${numeroTicket}`);
+        const getRes = http.get(`${BASE_URL}/api/helpdesk/tickets/status/${numeroTicket}`, {
+          tags: { name: 'GET /api/helpdesk/tickets/status/{numeroTicket}' }
+        });
 
         check(getRes, {
           'GET ticket status is 200': (r) => r.status === 200,
