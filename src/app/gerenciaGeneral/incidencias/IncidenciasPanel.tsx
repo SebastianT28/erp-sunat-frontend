@@ -136,7 +136,7 @@ export default function IncidenciasPanel() {
             placeholder="Buscar por código, usuario o descripción..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0063AE] focus:border-transparent text-sm transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0063AE] focus:border-transparent text-sm text-black placeholder-gray-500 transition-all"
           />
         </div>
       </div>
