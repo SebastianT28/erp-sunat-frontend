@@ -7,7 +7,7 @@ type Incidencia = {
   fechaDeteccion: string;
   reportadoPor: string;
   areaAfectada: string;
-  categorias: string[];
+  tipo: string;
   descripcion: string;
   urgencia: string;
   impacto: string;
@@ -17,17 +17,33 @@ type Incidencia = {
 export default function IncidenciasPanel() {
   const [incidencias, setIncidencias] = useState<Incidencia[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCierreModalOpen, setIsCierreModalOpen] = useState(false);
+  const [incidenciaActiva, setIncidenciaActiva] = useState<Incidencia | null>(null);
 
-  // Form states
+  // Form states - Registro
   const [codigo, setCodigo] = useState("");
   const [fechaDeteccion, setFechaDeteccion] = useState("");
   const [reportadoPor, setReportadoPor] = useState("");
   const [areaAfectada, setAreaAfectada] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [categorias, setCategorias] = useState<string[]>([]);
+  const [tipo, setTipo] = useState("");
   const [urgencia, setUrgencia] = useState("");
   const [impacto, setImpacto] = useState("");
+
+  // Form states - Cierre
+  const [responsableResolucion, setResponsableResolucion] = useState("");
+  const [horaInicioAtencion, setHoraInicioAtencion] = useState("");
+  const [causaRaiz, setCausaRaiz] = useState("");
+  const [accionContencion, setAccionContencion] = useState("");
+  const [requirioRollback, setRequirioRollback] = useState("");
+  const [tipoRollback, setTipoRollback] = useState("");
+  const [horaResolucion, setHoraResolucion] = useState("");
+  const [tiempoTotalResolucion, setTiempoTotalResolucion] = useState("");
+  const [accionPreventiva, setAccionPreventiva] = useState("");
+  const [estadoFinal, setEstadoFinal] = useState("");
 
   // Generar datos mock iniciales al cargar
   useEffect(() => {
@@ -38,7 +54,7 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-25T14:30",
         reportadoPor: "Juan Pérez",
         areaAfectada: "Área B (Logística)",
-        categorias: ["Aplicaciones", "Redes y comunicaciones"],
+        tipo: "Lógica de negocio",
         descripcion: "Error al emitir guía de remisión, el sistema se queda cargando.",
         urgencia: "Alta",
         impacto: "Retraso en el despacho de 5 camiones.",
@@ -50,45 +66,36 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-26T09:15",
         reportadoPor: "Ana Gómez",
         areaAfectada: "Infraestructura general",
-        categorias: ["Infraestructura", "Seguridad"],
+        tipo: "Disponibilidad",
         descripcion: "Caída temporal del servidor principal por 10 minutos.",
         urgencia: "Crítica",
         impacto: "Desconexión de todos los usuarios activos.",
-        estado: "Resuelto"
+        estado: "Abierto"
       }
     ];
     setIncidencias(mockData);
   }, []);
 
   const openNewModal = () => {
-    // Generar un código secuencial simple
     const nextNum = incidencias.length + 1;
     setCodigo(`INC-${nextNum.toString().padStart(3, '0')}`);
     
-    // Auto-completar con la fecha actual
     const now = new Date();
-    // Formato YYYY-MM-DDThh:mm compatible con input datetime-local
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     setFechaDeteccion(now.toISOString().slice(0,16));
     
     setReportadoPor("Administrador");
     setAreaAfectada("");
-    setCategorias([]);
+    setTipo("");
     setDescripcion("");
     setUrgencia("");
     setImpacto("");
     setIsModalOpen(true);
   };
 
-  const handleCategoriaChange = (cat: string) => {
-    setCategorias(prev =>
-      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-    );
-  };
-
   const handleSaveIncidencia = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!areaAfectada || !urgencia || !descripcion) {
+    if (!areaAfectada || !urgencia || !descripcion || !tipo) {
       alert("Por favor complete los campos obligatorios.");
       return;
     }
@@ -99,7 +106,7 @@ export default function IncidenciasPanel() {
       fechaDeteccion,
       reportadoPor,
       areaAfectada,
-      categorias,
+      tipo,
       descripcion,
       urgencia,
       impacto,
@@ -108,6 +115,38 @@ export default function IncidenciasPanel() {
 
     setIncidencias([nuevaIncidencia, ...incidencias]);
     setIsModalOpen(false);
+  };
+
+  const openCierreModal = (inc: Incidencia) => {
+    setIncidenciaActiva(inc);
+    setResponsableResolucion("");
+    setHoraInicioAtencion("");
+    setCausaRaiz("");
+    setAccionContencion("");
+    setRequirioRollback("");
+    setTipoRollback("");
+    setHoraResolucion("");
+    setTiempoTotalResolucion("");
+    setAccionPreventiva("");
+    setEstadoFinal("");
+    setIsCierreModalOpen(true);
+  };
+
+  const handleSaveCierre = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!incidenciaActiva) return;
+
+    // Actualizar estado de la incidencia en la lista
+    const actualizadas = incidencias.map(inc => {
+      if (inc.id === incidenciaActiva.id) {
+        return { ...inc, estado: estadoFinal || "Cerrado" }; // Cambiamos el estado según selección
+      }
+      return inc;
+    });
+
+    setIncidencias(actualizadas);
+    setIsCierreModalOpen(false);
+    setIncidenciaActiva(null);
   };
 
   const handleDelete = (id: string) => {
@@ -160,8 +199,8 @@ export default function IncidenciasPanel() {
             <tr>
               <th scope="col" className="px-6 py-4 font-extrabold">Código</th>
               <th scope="col" className="px-6 py-4 font-extrabold">Fecha/Hora</th>
-              <th scope="col" className="px-6 py-4 font-extrabold">Área / Reportado Por</th>
-              <th scope="col" className="px-6 py-4 font-extrabold">Urgencia</th>
+              <th scope="col" className="px-6 py-4 font-extrabold">Área / Tipo</th>
+              <th scope="col" className="px-6 py-4 font-extrabold text-center">Estado / Urgencia</th>
               <th scope="col" className="px-6 py-4 font-extrabold text-center">Acciones</th>
             </tr>
           </thead>
@@ -177,26 +216,43 @@ export default function IncidenciasPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-bold text-[#0063AE]">{inc.areaAfectada}</div>
-                    <div className="text-xs text-gray-500 font-medium">{inc.reportadoPor}</div>
+                    <div className="text-xs text-gray-500 font-medium">{inc.tipo}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border inline-block ${
-                      inc.urgencia === 'Crítica' ? 'bg-red-100 text-red-800 border-red-200' :
-                      inc.urgencia === 'Alta' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                      inc.urgencia === 'Media' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                      'bg-green-100 text-green-800 border-green-200'
-                    }`}>
-                      {inc.urgencia}
-                    </span>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border inline-block ${
+                        inc.estado === 'Abierto' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                        inc.estado.includes('Resuelto') ? 'bg-green-100 text-green-800 border-green-200' :
+                        'bg-gray-100 text-gray-800 border-gray-200'
+                      }`}>
+                        {inc.estado}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest border inline-block ${
+                        inc.urgencia === 'Crítica' ? 'bg-red-50 text-red-700 border-red-200' :
+                        inc.urgencia === 'Alta' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                        inc.urgencia === 'Media' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                        'bg-green-50 text-green-700 border-green-200'
+                      }`}>
+                        {inc.urgencia}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex justify-center gap-2">
                       <button 
+                        onClick={() => openCierreModal(inc)}
+                        className="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition-colors text-xs font-bold shadow-sm flex items-center gap-1"
+                        title="Adjuntar Cierre de Incidencia"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Cierre
+                      </button>
+                      <button 
                         onClick={() => handleDelete(inc.id)}
-                        className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                        className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-lg transition-colors"
                         title="Eliminar"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                       </button>
                     </div>
                   </td>
@@ -287,30 +343,32 @@ export default function IncidenciasPanel() {
                 </div>
               </div>
 
-              {/* Categoría */}
+              {/* Tipo de Incidencia */}
               <div>
                 <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-2">
-                  Categoría <span className="text-red-500">*</span>
+                  Tipo <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {["Infraestructura", "Aplicaciones", "Base de datos", "Redes y comunicaciones", "Seguridad", "Documentación", "Otros"].map(cat => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {["Disponibilidad", "Autenticación", "Lógica de negocio", "Rendimiento", "Frontend/UI", "Backend/API"].map(t => (
                     <label
-                      key={cat}
+                      key={t}
                       className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all select-none ${
-                        categorias.includes(cat)
+                        tipo === t
                           ? 'border-[#0063AE] bg-blue-50 ring-1 ring-[#0063AE]'
                           : 'border-gray-200 bg-white hover:bg-gray-50'
                       }`}
                     >
                       <input
-                        type="checkbox"
-                        checked={categorias.includes(cat)}
-                        onChange={() => handleCategoriaChange(cat)}
-                        className="w-4 h-4 rounded text-[#0063AE] focus:ring-[#0063AE] cursor-pointer accent-[#0063AE]"
+                        type="radio"
+                        name="tipoIncidencia"
+                        value={t}
+                        checked={tipo === t}
+                        onChange={(e) => setTipo(e.target.value)}
+                        className="w-4 h-4 rounded-full text-[#0063AE] focus:ring-[#0063AE] cursor-pointer accent-[#0063AE]"
                       />
                       <span className={`text-sm font-medium ${
-                        categorias.includes(cat) ? 'text-[#0063AE] font-bold' : 'text-gray-700'
-                      }`}>{cat}</span>
+                        tipo === t ? 'text-[#0063AE] font-bold' : 'text-gray-700'
+                      }`}>{t}</span>
                     </label>
                   ))}
                 </div>
@@ -376,6 +434,203 @@ export default function IncidenciasPanel() {
                   className="px-6 py-2.5 bg-[#0063AE] text-white text-sm font-extrabold rounded-lg shadow-md hover:bg-[#004d8a] hover:shadow-lg transition-all"
                 >
                   Guardar Incidente
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL PARA CIERRE DE INCIDENCIA --- */}
+      {isCierreModalOpen && incidenciaActiva && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-8 flex flex-col animate-scale-in">
+            <div className="bg-gradient-to-r from-green-600 to-green-800 p-5 flex justify-between items-center text-white rounded-t-2xl">
+              <h3 className="font-extrabold text-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Formato de Cierre de Incidente
+              </h3>
+              <button onClick={() => setIsCierreModalOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center bg-white/20 hover:bg-white/30 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveCierre} className="p-6 flex flex-col gap-5 bg-gray-50/30">
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-100 rounded-xl">
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Código de Incidente</label>
+                  <span className="text-sm font-bold text-gray-800">{incidenciaActiva.codigo}</span>
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Urgencia Inicial</label>
+                  <span className="text-sm font-bold text-gray-800">{incidenciaActiva.urgencia}</span>
+                </div>
+                <div>
+                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Categoría/Tipo</label>
+                  <span className="text-sm font-bold text-gray-800">{incidenciaActiva.tipo}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Responsable de resolución <span className="text-red-500">*</span></label>
+                  <input 
+                    type="text" 
+                    value={responsableResolucion}
+                    onChange={(e) => setResponsableResolucion(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                    placeholder="Ej. Ing. Carlos Pérez"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Hora de inicio de atención <span className="text-red-500">*</span></label>
+                  <input 
+                    type="datetime-local" 
+                    value={horaInicioAtencion}
+                    onChange={(e) => setHoraInicioAtencion(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Causa raíz identificada <span className="text-red-500">*</span></label>
+                <textarea 
+                  value={causaRaiz}
+                  onChange={(e) => setCausaRaiz(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  rows={2}
+                  placeholder="Explique el origen del problema..."
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Acción de contención aplicada</label>
+                <textarea 
+                  value={accionContencion}
+                  onChange={(e) => setAccionContencion(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  rows={2}
+                  placeholder="¿Qué medidas inmediatas se tomaron para mitigar el impacto?"
+                />
+              </div>
+
+              <div className="p-4 border rounded-xl bg-white border-gray-200">
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-3">¿Requiere Rollback?</label>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-4">
+                    {["Sí", "No", "No aplica"].map(r => (
+                      <label key={r} className="flex items-center gap-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="requirioRollback" 
+                          value={r} 
+                          checked={requirioRollback === r}
+                          onChange={(e) => {
+                            setRequirioRollback(e.target.value);
+                            if (e.target.value !== "Sí") setTipoRollback("");
+                          }}
+                          className="w-4 h-4 text-green-600 focus:ring-green-600 accent-green-600 cursor-pointer"
+                        />
+                        <span className="text-sm font-medium text-gray-700">{r}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {requirioRollback === "Sí" && (
+                    <div className="mt-2 pl-4 border-l-2 border-green-200">
+                      <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-2">Tipo de Rollback</label>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        {["git revert", "Rollback de contenedor Docker", "Otro"].map(tr => (
+                          <label key={tr} className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name="tipoRollback" 
+                              value={tr} 
+                              checked={tipoRollback === tr}
+                              onChange={(e) => setTipoRollback(e.target.value)}
+                              className="w-4 h-4 text-green-600 focus:ring-green-600 accent-green-600 cursor-pointer"
+                            />
+                            <span className="text-sm font-medium text-gray-700">{tr}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Hora de resolución</label>
+                  <input 
+                    type="datetime-local" 
+                    value={horaResolucion}
+                    onChange={(e) => setHoraResolucion(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Tiempo total de resolución</label>
+                  <input 
+                    type="text" 
+                    value={tiempoTotalResolucion}
+                    onChange={(e) => setTiempoTotalResolucion(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                    placeholder="Ej. 2 horas 30 minutos"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-1.5">Acción preventiva definida</label>
+                <textarea 
+                  value={accionPreventiva}
+                  onChange={(e) => setAccionPreventiva(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm text-black focus:ring-2 focus:ring-green-600 focus:outline-none"
+                  rows={2}
+                  placeholder="¿Qué se hará para evitar que esto vuelva a ocurrir?"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-2">Estado Final <span className="text-red-500">*</span></label>
+                <div className="flex flex-wrap gap-3">
+                  {["Resuelto", "Resuelto con seguimiento", "Reabierto"].map(ef => (
+                    <label key={ef} className={`flex items-center gap-2 px-4 py-2 border rounded-full cursor-pointer transition-all ${estadoFinal === ef ? 'border-green-600 bg-green-50 ring-1 ring-green-600' : 'border-gray-200 bg-white hover:bg-gray-50'}`}>
+                      <input 
+                        type="radio" 
+                        name="estadoFinal" 
+                        value={ef}
+                        checked={estadoFinal === ef}
+                        onChange={(e) => setEstadoFinal(e.target.value)}
+                        className="w-4 h-4 text-green-600 focus:ring-green-600 accent-green-600 cursor-pointer"
+                      />
+                      <span className={`text-sm font-bold ${estadoFinal === ef ? 'text-green-700' : 'text-gray-600'}`}>{ef}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200 flex justify-end gap-3 mt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setIsCierreModalOpen(false)}
+                  className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  className="px-6 py-2.5 bg-green-600 text-white text-sm font-extrabold rounded-lg shadow-md hover:bg-green-700 hover:shadow-lg transition-all flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  Confirmar Cierre
                 </button>
               </div>
 
