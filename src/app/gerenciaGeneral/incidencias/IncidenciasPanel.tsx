@@ -7,10 +7,11 @@ type Incidencia = {
   fechaDeteccion: string;
   reportadoPor: string;
   areaAfectada: string;
+  categorias: string[];
   descripcion: string;
   urgencia: string;
   impacto: string;
-  estado: string; // Para tener un estado visual en la tabla
+  estado: string;
 };
 
 export default function IncidenciasPanel() {
@@ -24,6 +25,7 @@ export default function IncidenciasPanel() {
   const [reportadoPor, setReportadoPor] = useState("");
   const [areaAfectada, setAreaAfectada] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [categorias, setCategorias] = useState<string[]>([]);
   const [urgencia, setUrgencia] = useState("");
   const [impacto, setImpacto] = useState("");
 
@@ -36,6 +38,7 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-25T14:30",
         reportadoPor: "Juan Pérez",
         areaAfectada: "Área B (Logística)",
+        categorias: ["Aplicaciones", "Redes y comunicaciones"],
         descripcion: "Error al emitir guía de remisión, el sistema se queda cargando.",
         urgencia: "Alta",
         impacto: "Retraso en el despacho de 5 camiones.",
@@ -47,6 +50,7 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-26T09:15",
         reportadoPor: "Ana Gómez",
         areaAfectada: "Infraestructura general",
+        categorias: ["Infraestructura", "Seguridad"],
         descripcion: "Caída temporal del servidor principal por 10 minutos.",
         urgencia: "Crítica",
         impacto: "Desconexión de todos los usuarios activos.",
@@ -67,12 +71,19 @@ export default function IncidenciasPanel() {
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
     setFechaDeteccion(now.toISOString().slice(0,16));
     
-    setReportadoPor("Administrador"); // Asumimos que lo registra el admin actual
+    setReportadoPor("Administrador");
     setAreaAfectada("");
+    setCategorias([]);
     setDescripcion("");
     setUrgencia("");
     setImpacto("");
     setIsModalOpen(true);
+  };
+
+  const handleCategoriaChange = (cat: string) => {
+    setCategorias(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
   };
 
   const handleSaveIncidencia = (e: React.FormEvent) => {
@@ -88,6 +99,7 @@ export default function IncidenciasPanel() {
       fechaDeteccion,
       reportadoPor,
       areaAfectada,
+      categorias,
       descripcion,
       urgencia,
       impacto,
@@ -270,6 +282,35 @@ export default function IncidenciasPanel() {
                         className="w-4 h-4 text-[#0063AE] focus:ring-[#0063AE] cursor-pointer"
                       />
                       <span className="text-sm font-medium text-gray-700">{area}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Categoría */}
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-2">
+                  Categoría <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {["Infraestructura", "Aplicaciones", "Base de datos", "Redes y comunicaciones", "Seguridad", "Documentación", "Otros"].map(cat => (
+                    <label
+                      key={cat}
+                      className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all select-none ${
+                        categorias.includes(cat)
+                          ? 'border-[#0063AE] bg-blue-50 ring-1 ring-[#0063AE]'
+                          : 'border-gray-200 bg-white hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={categorias.includes(cat)}
+                        onChange={() => handleCategoriaChange(cat)}
+                        className="w-4 h-4 rounded text-[#0063AE] focus:ring-[#0063AE] cursor-pointer accent-[#0063AE]"
+                      />
+                      <span className={`text-sm font-medium ${
+                        categorias.includes(cat) ? 'text-[#0063AE] font-bold' : 'text-gray-700'
+                      }`}>{cat}</span>
                     </label>
                   ))}
                 </div>
