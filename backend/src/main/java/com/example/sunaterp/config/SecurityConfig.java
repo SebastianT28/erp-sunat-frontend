@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/helpdesk/tickets/status/**").permitAll() // Consulta de tickets
                 .requestMatchers("/api/helpdesk/faqs/active").permitAll()       // FAQs públicas para el chatbot
                 .requestMatchers("/api/helpdesk/quick-actions/active").permitAll() // Quick Actions para el chatbot
+                // /api/soporte/incidencias/** requiere autenticación (cubierto por anyRequest)
                 .anyRequest().authenticated()                            // Todo lo demás protegido
             )
             // 4. Configurar manejo de sesión a STATELESS porque usamos JWT
