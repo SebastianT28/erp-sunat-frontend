@@ -596,8 +596,8 @@ export default function IncidenciasPanel() {
                 </button>
               </div>
             </div>
-            <div className="p-8 overflow-y-auto bg-gray-200 flex-1 print:p-0 print:bg-white">
-              <div className="max-w-[21cm] min-h-[29.7cm] mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 text-black text-sm">
+            <div className="p-8 overflow-y-auto bg-gray-200 flex-1 print:p-0 print:bg-white print:overflow-visible">
+              <div className="print-area max-w-[21cm] min-h-[29.7cm] mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 text-black text-sm">
                 <div className="border-b-2 border-gray-800 pb-6 mb-8 flex justify-between items-end">
                   <div>
                     <h1 className="text-3xl font-black uppercase mb-1">{pdfType === 'reporte' ? 'Reporte de Incidencia' : 'Cierre de Incidencia'}</h1>
@@ -663,11 +663,24 @@ export default function IncidenciasPanel() {
       <style jsx global>{`
         .animate-scale-in { animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes scaleIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
         @media print {
           .print\\:hidden { display: none !important; }
           body * { visibility: hidden; }
-          .max-w-\\[21cm\\], .max-w-\\[21cm\\] * { visibility: visible; }
-          .max-w-\\[21cm\\] { position: absolute; left: 0; top: 0; width: 100%; }
+          .print-area, .print-area * { visibility: visible; }
+          .print-area { 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+          }
+          /* Es crítico quitar los límites de altura y scroll durante la impresión */
+          html, body, .fixed, .absolute, .overflow-y-auto {
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            position: static !important;
+          }
         }
       `}</style>
     </div>
