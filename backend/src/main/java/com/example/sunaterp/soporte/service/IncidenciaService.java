@@ -6,6 +6,8 @@ import com.example.sunaterp.soporte.entity.CierreIncidencia;
 import com.example.sunaterp.soporte.entity.ReporteIncidencia;
 import com.example.sunaterp.soporte.repository.CierreIncidenciaRepository;
 import com.example.sunaterp.soporte.repository.ReporteIncidenciaRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +18,16 @@ import java.util.stream.Collectors;
 @Service
 public class IncidenciaService {
 
+    private static final Logger log = LoggerFactory.getLogger(IncidenciaService.class);
+
     @Autowired
     private ReporteIncidenciaRepository reporteRepository;
 
     @Autowired
     private CierreIncidenciaRepository cierreRepository;
+
+    @Autowired
+    private JiraIntegrationService jiraIntegrationService;
 
     // ---- REPORTES ----
 
@@ -49,7 +56,22 @@ public class IncidenciaService {
         reporte.setImpacto(dto.getImpacto());
         reporte.setEstado("Abierto");
 
-        return toReporteDTO(reporteRepository.save(reporte));
+        ReporteIncidencia guardado = reporteRepository.save(reporte);
+
+        // Crear ticket en Jira de forma asíncrona (no bloquea si Jira falla)
+        String jiraKey = jiraIntegrationService.crearTicketJira(
+                guardado.getCodigo(),
+                guardado.getDescripcion(),
+                guardado.getUrgencia(),
+                guardado.getAreaAfectada(),
+                guardado.getCategoria(),
+                guardado.getReportadoPor()
+        );
+        if (jiraKey != null) {
+            log.info("Incidencia {} vinculada al ticket Jira: {}", guardado.getCodigo(), jiraKey);
+        }
+
+        return toReporteDTO(guardado);
     }
 
     @Transactional
