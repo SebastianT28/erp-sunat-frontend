@@ -597,7 +597,7 @@ export default function IncidenciasPanel() {
               </div>
             </div>
             <div className="p-8 overflow-y-auto bg-gray-200 flex-1 print:p-0 print:bg-white print:overflow-visible">
-              <div className="print-area max-w-[21cm] min-h-[29.7cm] print:min-h-0 print:h-auto mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 print:p-0 text-black text-sm">
+              <div className="print-area max-w-[21cm] mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 print:p-0 text-black text-sm">
                 <div className="border-b-2 border-gray-800 pb-6 mb-8 print:pb-4 print:mb-4 flex justify-between items-end">
                   <div>
                     <h1 className="text-3xl font-black uppercase mb-1 print:text-2xl">{pdfType === 'reporte' ? 'Reporte de Incidencia' : 'Cierre de Incidencia'}</h1>
@@ -650,7 +650,7 @@ export default function IncidenciasPanel() {
                     </tbody>
                   </table>
                 )}
-                <div className="mt-20 pt-10 print:mt-12 print:pt-6 border-t border-gray-300 flex justify-between">
+                <div className="mt-20 pt-10 print:mt-10 print:pt-4 border-t border-gray-300 flex justify-between">
                   <div className="text-center w-1/3"><div className="border-b border-gray-400 h-8 mb-2"></div><p className="font-bold text-xs">Firma del Reportante</p></div>
                   <div className="text-center w-1/3"><div className="border-b border-gray-400 h-8 mb-2"></div><p className="font-bold text-xs">Firma de Aprobación</p></div>
                 </div>
@@ -667,25 +667,35 @@ export default function IncidenciasPanel() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 1cm;
+            margin: 10mm;
           }
-          .print\\:hidden { display: none !important; }
-          body * { visibility: hidden; }
-          .print-area, .print-area * { visibility: visible; }
+
+          body * { 
+            visibility: hidden; 
+          }
+          
+          .print-area, .print-area * { 
+            visibility: visible; 
+          }
+
           .print-area { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
+            position: absolute !important; 
+            left: 0 !important; 
+            top: 0 !important; 
+            width: 100% !important; 
             margin: 0 !important;
-            box-sizing: border-box;
+            padding: 0 !important;
+            box-sizing: border-box !important;
           }
-          /* Es crítico quitar los límites de altura y scroll durante la impresión */
-          html, body, .fixed, .absolute, .overflow-y-auto {
-            height: auto !important;
-            max-height: none !important;
-            overflow: visible !important;
-            position: static !important;
+
+          /* FORZAR 1 SOLA PÁGINA: Eliminar scroll fantasma y alturas desbordadas */
+          html, body {
+            height: 100% !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
           }
         }
       `}</style>
