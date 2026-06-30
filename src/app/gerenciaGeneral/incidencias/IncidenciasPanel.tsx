@@ -7,7 +7,7 @@ type Incidencia = {
   fechaDeteccion: string;
   reportadoPor: string;
   areaAfectada: string;
-  tipo: string;
+  categoria: string;
   descripcion: string;
   urgencia: string;
   impacto: string;
@@ -28,12 +28,13 @@ export default function IncidenciasPanel() {
   const [fechaDeteccion, setFechaDeteccion] = useState("");
   const [reportadoPor, setReportadoPor] = useState("");
   const [areaAfectada, setAreaAfectada] = useState("");
+  const [categoria, setCategoria] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [tipo, setTipo] = useState("");
   const [urgencia, setUrgencia] = useState("");
   const [impacto, setImpacto] = useState("");
 
   // Form states - Cierre
+  const [tipoCierre, setTipoCierre] = useState("");
   const [responsableResolucion, setResponsableResolucion] = useState("");
   const [horaInicioAtencion, setHoraInicioAtencion] = useState("");
   const [causaRaiz, setCausaRaiz] = useState("");
@@ -54,7 +55,7 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-25T14:30",
         reportadoPor: "Juan Pérez",
         areaAfectada: "Área B (Logística)",
-        tipo: "Lógica de negocio",
+        categoria: "Aplicaciones",
         descripcion: "Error al emitir guía de remisión, el sistema se queda cargando.",
         urgencia: "Alta",
         impacto: "Retraso en el despacho de 5 camiones.",
@@ -66,7 +67,7 @@ export default function IncidenciasPanel() {
         fechaDeteccion: "2023-10-26T09:15",
         reportadoPor: "Ana Gómez",
         areaAfectada: "Infraestructura general",
-        tipo: "Disponibilidad",
+        categoria: "Infraestructura",
         descripcion: "Caída temporal del servidor principal por 10 minutos.",
         urgencia: "Crítica",
         impacto: "Desconexión de todos los usuarios activos.",
@@ -86,7 +87,7 @@ export default function IncidenciasPanel() {
     
     setReportadoPor("Administrador");
     setAreaAfectada("");
-    setTipo("");
+    setCategoria("");
     setDescripcion("");
     setUrgencia("");
     setImpacto("");
@@ -95,7 +96,7 @@ export default function IncidenciasPanel() {
 
   const handleSaveIncidencia = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!areaAfectada || !urgencia || !descripcion || !tipo) {
+    if (!areaAfectada || !urgencia || !descripcion || !categoria) {
       alert("Por favor complete los campos obligatorios.");
       return;
     }
@@ -106,7 +107,7 @@ export default function IncidenciasPanel() {
       fechaDeteccion,
       reportadoPor,
       areaAfectada,
-      tipo,
+      categoria,
       descripcion,
       urgencia,
       impacto,
@@ -119,6 +120,7 @@ export default function IncidenciasPanel() {
 
   const openCierreModal = (inc: Incidencia) => {
     setIncidenciaActiva(inc);
+    setTipoCierre("");
     setResponsableResolucion("");
     setHoraInicioAtencion("");
     setCausaRaiz("");
@@ -134,12 +136,15 @@ export default function IncidenciasPanel() {
 
   const handleSaveCierre = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!incidenciaActiva) return;
+    if (!incidenciaActiva || !tipoCierre || !estadoFinal) {
+      alert("Por favor complete los campos obligatorios del cierre.");
+      return;
+    }
 
     // Actualizar estado de la incidencia en la lista
     const actualizadas = incidencias.map(inc => {
       if (inc.id === incidenciaActiva.id) {
-        return { ...inc, estado: estadoFinal || "Cerrado" }; // Cambiamos el estado según selección
+        return { ...inc, estado: estadoFinal }; // Cambiamos el estado según selección
       }
       return inc;
     });
@@ -199,7 +204,7 @@ export default function IncidenciasPanel() {
             <tr>
               <th scope="col" className="px-6 py-4 font-extrabold">Código</th>
               <th scope="col" className="px-6 py-4 font-extrabold">Fecha/Hora</th>
-              <th scope="col" className="px-6 py-4 font-extrabold">Área / Tipo</th>
+              <th scope="col" className="px-6 py-4 font-extrabold">Área / Categoría</th>
               <th scope="col" className="px-6 py-4 font-extrabold text-center">Estado / Urgencia</th>
               <th scope="col" className="px-6 py-4 font-extrabold text-center">Acciones</th>
             </tr>
@@ -216,7 +221,7 @@ export default function IncidenciasPanel() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-bold text-[#0063AE]">{inc.areaAfectada}</div>
-                    <div className="text-xs text-gray-500 font-medium">{inc.tipo}</div>
+                    <div className="text-xs text-gray-500 font-medium">{inc.categoria}</div>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex flex-col items-center gap-1">
@@ -343,32 +348,32 @@ export default function IncidenciasPanel() {
                 </div>
               </div>
 
-              {/* Tipo de Incidencia */}
+              {/* Categoría - Selección única */}
               <div>
                 <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-2">
-                  Tipo <span className="text-red-500">*</span>
+                  Categoría <span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {["Disponibilidad", "Autenticación", "Lógica de negocio", "Rendimiento", "Frontend/UI", "Backend/API"].map(t => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {["Infraestructura", "Aplicaciones", "Base de datos", "Redes y comunicaciones", "Seguridad", "Documentación", "Otros"].map(cat => (
                     <label
-                      key={t}
+                      key={cat}
                       className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all select-none ${
-                        tipo === t
+                        categoria === cat
                           ? 'border-[#0063AE] bg-blue-50 ring-1 ring-[#0063AE]'
                           : 'border-gray-200 bg-white hover:bg-gray-50'
                       }`}
                     >
                       <input
                         type="radio"
-                        name="tipoIncidencia"
-                        value={t}
-                        checked={tipo === t}
-                        onChange={(e) => setTipo(e.target.value)}
-                        className="w-4 h-4 rounded-full text-[#0063AE] focus:ring-[#0063AE] cursor-pointer accent-[#0063AE]"
+                        name="categoria"
+                        value={cat}
+                        checked={categoria === cat}
+                        onChange={(e) => setCategoria(e.target.value)}
+                        className="w-4 h-4 text-[#0063AE] focus:ring-[#0063AE] cursor-pointer"
                       />
                       <span className={`text-sm font-medium ${
-                        tipo === t ? 'text-[#0063AE] font-bold' : 'text-gray-700'
-                      }`}>{t}</span>
+                        categoria === cat ? 'text-[#0063AE] font-bold' : 'text-gray-700'
+                      }`}>{cat}</span>
                     </label>
                   ))}
                 </div>
@@ -458,7 +463,7 @@ export default function IncidenciasPanel() {
             
             <form onSubmit={handleSaveCierre} className="p-6 flex flex-col gap-5 bg-gray-50/30">
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-100 rounded-xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-100 rounded-xl">
                 <div>
                   <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Código de Incidente</label>
                   <span className="text-sm font-bold text-gray-800">{incidenciaActiva.codigo}</span>
@@ -467,9 +472,40 @@ export default function IncidenciasPanel() {
                   <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Urgencia Inicial</label>
                   <span className="text-sm font-bold text-gray-800">{incidenciaActiva.urgencia}</span>
                 </div>
-                <div>
-                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Categoría/Tipo</label>
-                  <span className="text-sm font-bold text-gray-800">{incidenciaActiva.tipo}</span>
+                <div className="col-span-1 md:col-span-2">
+                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider block mb-1">Categoría Inicial</label>
+                  <span className="text-sm font-bold text-[#0063AE]">{incidenciaActiva.categoria}</span>
+                </div>
+              </div>
+
+              {/* Tipo de Incidencia en el Cierre */}
+              <div>
+                <label className="text-xs font-extrabold text-gray-600 uppercase tracking-wider block mb-2">
+                  Tipo <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {["Disponibilidad", "Autenticación", "Lógica de negocio", "Rendimiento", "Frontend/UI", "Backend/API"].map(t => (
+                    <label
+                      key={t}
+                      className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-all select-none ${
+                        tipoCierre === t
+                          ? 'border-green-600 bg-green-50 ring-1 ring-green-600'
+                          : 'border-gray-200 bg-white hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="tipoCierre"
+                        value={t}
+                        checked={tipoCierre === t}
+                        onChange={(e) => setTipoCierre(e.target.value)}
+                        className="w-4 h-4 rounded-full text-green-600 focus:ring-green-600 cursor-pointer accent-green-600"
+                      />
+                      <span className={`text-sm font-medium ${
+                        tipoCierre === t ? 'text-green-700 font-bold' : 'text-gray-700'
+                      }`}>{t}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
