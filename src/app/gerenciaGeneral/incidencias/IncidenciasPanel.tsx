@@ -597,14 +597,14 @@ export default function IncidenciasPanel() {
               </div>
             </div>
             <div className="p-8 overflow-y-auto bg-gray-200 flex-1 print:p-0 print:bg-white print:overflow-visible">
-              <div className="print-area max-w-[21cm] min-h-[29.7cm] mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 text-black text-sm">
-                <div className="border-b-2 border-gray-800 pb-6 mb-8 flex justify-between items-end">
+              <div className="print-area max-w-[21cm] min-h-[29.7cm] print:min-h-0 print:h-auto mx-auto bg-white shadow-lg print:shadow-none p-10 md:p-14 print:p-0 text-black text-sm">
+                <div className="border-b-2 border-gray-800 pb-6 mb-8 print:pb-4 print:mb-4 flex justify-between items-end">
                   <div>
-                    <h1 className="text-3xl font-black uppercase mb-1">{pdfType === 'reporte' ? 'Reporte de Incidencia' : 'Cierre de Incidencia'}</h1>
+                    <h1 className="text-3xl font-black uppercase mb-1 print:text-2xl">{pdfType === 'reporte' ? 'Reporte de Incidencia' : 'Cierre de Incidencia'}</h1>
                     <p className="text-gray-500 font-bold uppercase tracking-wider text-xs">Sistema ERP - SUNAT</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-extrabold text-2xl">{incidenciaActiva.codigo}</p>
+                    <p className="font-extrabold text-2xl print:text-xl">{incidenciaActiva.codigo}</p>
                     <p className="text-sm text-gray-600 font-bold mt-1">Generado: {new Date().toLocaleDateString()}</p>
                   </div>
                 </div>
@@ -621,8 +621,8 @@ export default function IncidenciasPanel() {
                         ["Impacto en el Usuario:", incidenciaActiva.impacto || "No especificado"],
                       ].map(([label, value]) => (
                         <tr key={label as string} className="border-b border-gray-300">
-                          <td className="p-3 bg-gray-50 font-bold w-1/3 border-r border-gray-300 align-top">{label}</td>
-                          <td className="p-3 font-medium whitespace-pre-wrap">{value}</td>
+                          <td className="p-3 print:p-2 bg-gray-50 font-bold w-1/3 border-r border-gray-300 align-top">{label}</td>
+                          <td className="p-3 print:p-2 font-medium whitespace-pre-wrap">{value}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -643,14 +643,14 @@ export default function IncidenciasPanel() {
                         ["Estado Final:", incidenciaActiva.cierre?.estadoFinal || incidenciaActiva.estado],
                       ].map(([label, value]) => (
                         <tr key={label as string} className="border-b border-gray-300">
-                          <td className="p-3 bg-gray-50 font-bold w-1/3 border-r border-gray-300 align-top">{label}</td>
-                          <td className="p-3 font-medium whitespace-pre-wrap">{value}</td>
+                          <td className="p-3 print:p-2 bg-gray-50 font-bold w-1/3 border-r border-gray-300 align-top">{label}</td>
+                          <td className="p-3 print:p-2 font-medium whitespace-pre-wrap">{value}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 )}
-                <div className="mt-20 pt-10 border-t border-gray-300 flex justify-between">
+                <div className="mt-20 pt-10 print:mt-12 print:pt-6 border-t border-gray-300 flex justify-between">
                   <div className="text-center w-1/3"><div className="border-b border-gray-400 h-8 mb-2"></div><p className="font-bold text-xs">Firma del Reportante</p></div>
                   <div className="text-center w-1/3"><div className="border-b border-gray-400 h-8 mb-2"></div><p className="font-bold text-xs">Firma de Aprobación</p></div>
                 </div>
@@ -665,6 +665,10 @@ export default function IncidenciasPanel() {
         @keyframes scaleIn { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
         @media print {
+          @page {
+            size: A4 portrait;
+            margin: 1cm;
+          }
           .print\\:hidden { display: none !important; }
           body * { visibility: hidden; }
           .print-area, .print-area * { visibility: visible; }
@@ -673,6 +677,8 @@ export default function IncidenciasPanel() {
             left: 0; 
             top: 0; 
             width: 100%; 
+            margin: 0 !important;
+            box-sizing: border-box;
           }
           /* Es crítico quitar los límites de altura y scroll durante la impresión */
           html, body, .fixed, .absolute, .overflow-y-auto {
