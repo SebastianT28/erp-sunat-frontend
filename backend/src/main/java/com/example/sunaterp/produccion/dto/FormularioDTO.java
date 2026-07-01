@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class FormularioDTO {
+    private Integer idUsuario;
+    private String ruc;
+
     // Para simplificar la recepción desde frontend (MM/AAAA)
     private String periodoTributario;
     
@@ -134,5 +137,21 @@ public class FormularioDTO {
 
     public void setCasillas(List<CasillaDTO> casillas) {
         this.casillas = casillas;
+    }
+
+    public Integer getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Integer idUsuario) {
+        this.idUsuario = idUsuario;
+    }
+
+    public String getRuc() {
+        return ruc;
+    }
+
+    public void setRuc(String ruc) {
+        this.ruc = ruc;
     }
 }

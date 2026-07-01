@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Seccion1 from './Seccion1';
 import Seccion2 from './Seccion2';
 import Seccion3 from './Seccion3';
@@ -12,6 +12,8 @@ export default function PaginaOperaciones() {
   // ESTADO GLOBAL
   const [formData, setFormData] = useState({
     idBaseDatos: null,
+    idUsuario: 1,
+    ruc: '20498697381',
     periodoTributario: '',
     tipoDeclaracion: '',
     condicionIgv: 'Cuenta propia',
@@ -27,6 +29,22 @@ export default function PaginaOperaciones() {
     coeficienteSunat: 0.0,
     casillas: [] as { numeroCasilla: string, valor: number }[]
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("user");
+        if (stored) {
+          const u = JSON.parse(stored);
+          setFormData(prev => ({
+            ...prev,
+            idUsuario: u.idUsuario || prev.idUsuario,
+            ruc: u.contribuyente?.ruc || prev.ruc
+          }));
+        }
+      } catch (e) {}
+    }
+  }, []);
 
   const actualizarDatos = (nuevosDatos: any) => {
     setFormData(prev => ({ ...prev, ...nuevosDatos }));

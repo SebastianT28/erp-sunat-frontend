@@ -24,4 +24,22 @@ public class FormularioController {
             return new ResponseEntity<>("Error al guardar el formulario: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping
+    public ResponseEntity<?> listarFormularios() {
+        try {
+            return ResponseEntity.ok(formularioService.listarFormularios());
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al obtener formularios: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<?> listarFormulariosPorUsuario(@PathVariable Integer idUsuario) {
+        try {
+            return ResponseEntity.ok(formularioService.listarFormulariosPorUsuario(idUsuario));
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error al obtener formularios del usuario: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -48,7 +48,7 @@ export default function Seccion3({ alAnterior, alPago, datos, actualizarDatos }:
   }, [datos.casillas]);
 
   const manejarExportacionTxt = () => {
-    const ruc = "20123456789"; // Genérico como solicitado
+    const ruc = datos.ruc || "20123456789";
     const periodo = datos.periodoTributario ? datos.periodoTributario.replace('/', '') : '000000';
     const nombreArchivo = `0621${ruc}${periodo}.txt`;
 
