@@ -28,7 +28,7 @@ export default function Seccion2({ formData, updateFormData, nextStep, prevStep 
   const [ventasMensuales, setVentasMensuales] = useState("");
   const [emiteFacturas, setEmiteFacturas] = useState("");
 
-  const showAsistente = formData.motivoInscripcion === "Iniciar un negocio propio";
+  const showAsistente = formData.motivoInscripcion === "Iniciar un negocio propio" || formData.motivoInscripcion === "Constituir una empresa (Persona Jurídica)";
 
   // Ubigeo mock data
   const departamentos = [

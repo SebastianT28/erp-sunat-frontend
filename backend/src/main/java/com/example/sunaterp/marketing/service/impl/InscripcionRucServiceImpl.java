@@ -40,11 +40,18 @@ public class InscripcionRucServiceImpl implements InscripcionRucService {
     public InscripcionRuc guardarInscripcion(InscripcionRucDTO dto) {
         // 1. Instanciar y guardar Contribuyente
         Contribuyente contribuyente = new Contribuyente();
-        String ruc = "10" + dto.getDni() + "4";
+        String rucPrefix = "10";
+        String tipoContribuyente = "PERSONA NATURAL CON NEGOCIO";
+        if (dto.getMotivoInscripcion() != null && 
+           (dto.getMotivoInscripcion().contains("Empresa") || dto.getMotivoInscripcion().contains("Persona Jurídica"))) {
+            rucPrefix = "20";
+            tipoContribuyente = "PERSONA JURÍDICA";
+        }
+        String ruc = rucPrefix + dto.getDni() + "4";
         contribuyente.setRuc(ruc);
         contribuyente.setRazonSocial(dto.getNombres() + " " + dto.getApellidos());
         contribuyente.setDireccion(dto.getDireccionFisica());
-        contribuyente.setTipoContribuyente("PERSONA NATURAL CON NEGOCIO");
+        contribuyente.setTipoContribuyente(tipoContribuyente);
         
         contribuyente = contribuyenteRepository.save(contribuyente);
 

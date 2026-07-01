@@ -120,7 +120,7 @@ export default function MarketingPage() {
         </div>
 
         {/* Contenedor central blanco con sombra suave */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-5 sm:p-6 transition-all duration-300">
+        <div className="bg-white rounded-2xl shadow-xl overflow-visible p-5 sm:p-6 transition-all duration-300">
           {step === 1 && (
             <Seccion1
               formData={formData}
