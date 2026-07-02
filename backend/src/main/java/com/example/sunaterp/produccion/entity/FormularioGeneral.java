@@ -1,5 +1,6 @@
 package com.example.sunaterp.produccion.entity;
 
+import com.example.sunaterp.login.entity.Usuario;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +14,10 @@ public class FormularioGeneral {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idusuario")
+    private Usuario usuario;
 
     @Column(name = "periodo_tributario")
     private LocalDate periodoTributario;
@@ -86,6 +91,14 @@ public class FormularioGeneral {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public LocalDate getPeriodoTributario() {

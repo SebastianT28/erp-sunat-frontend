@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import type { FormData } from "./page";
 
 interface Props {
@@ -9,6 +9,26 @@ interface Props {
 
 export default function Seccion1({ formData, updateFormData, nextStep }: Props) {
   const [error, setError] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const motivos = [
+    "Emitir recibos por honorarios",
+    "Iniciar un negocio propio",
+    "Constituir una empresa (Persona Jurídica)",
+    "Alquilar mis bienes",
+    "Pagar impuestos por venta de acciones, inmuebles u otros"
+  ];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleDniChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 8); // Solo numérico, máximo 8 caracteres
@@ -51,7 +71,7 @@ export default function Seccion1({ formData, updateFormData, nextStep }: Props) 
       <div>
         <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Valida tu Identidad</h2>
         <p className="text-gray-500 mb-5 text-sm">Ingresa tus datos principales para iniciar el proceso de alta en la plataforma.</p>
-        
+
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-700 border-l-4 border-red-500 rounded-r-lg text-sm font-medium flex items-center shadow-sm">
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -74,27 +94,49 @@ export default function Seccion1({ formData, updateFormData, nextStep }: Props) 
             />
           </div>
 
-          <div>
-            <label htmlFor="motivo" className="block text-sm font-semibold text-gray-700 mb-1.5">
+          <div className="relative" ref={dropdownRef}>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
               ¿Para qué te inscribes?
             </label>
-            <div className="relative">
-              <select
-                id="motivo"
-                value={formData.motivoInscripcion || ''}
-                onChange={(e) => updateFormData({ motivoInscripcion: e.target.value })}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0071BC] focus:border-[#0071BC] outline-none transition-all shadow-sm appearance-none cursor-pointer text-slate-900 bg-white"
+            <div
+              onClick={() => setIsOpen(!isOpen)}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl hover:border-gray-400 transition-all shadow-sm cursor-pointer bg-white flex items-center justify-between"
+            >
+              <span className={formData.motivoInscripcion ? "text-slate-900 font-medium" : "text-gray-500"}>
+                {formData.motivoInscripcion || "Selecciona una opción"}
+              </span>
+              <svg
+                className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <option value="" disabled className="text-gray-500">Selecciona una opción</option>
-                <option value="Emitir recibos por honorarios" className="text-slate-900">Emitir recibos por honorarios</option>
-                <option value="Iniciar un negocio propio" className="text-slate-900">Iniciar un negocio propio</option>
-                <option value="Alquilar mis bienes" className="text-slate-900">Alquilar mis bienes</option>
-                <option value="Pagar impuestos por venta de acciones, inmuebles u otros" className="text-slate-900">Pagar impuestos por venta de acciones, inmuebles u otros</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-              </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
+
+            {isOpen && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <ul className="divide-y divide-gray-100">
+                  {motivos.map((motivo, idx) => (
+                    <li
+                      key={idx}
+                      onClick={() => {
+                        updateFormData({ motivoInscripcion: motivo });
+                        setIsOpen(false);
+                      }}
+                      className={`px-4 py-3 text-sm cursor-pointer transition-colors ${
+                        formData.motivoInscripcion === motivo
+                          ? "bg-blue-50 text-[#0071BC] font-bold"
+                          : "text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium"
+                      }`}
+                    >
+                      {motivo}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <button
