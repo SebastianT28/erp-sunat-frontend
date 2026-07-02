@@ -164,10 +164,10 @@ export default function DashboardReportesPanel() {
         doc.setFillColor(0, 99, 174) // #0063AE
         doc.rect(0, 0, 210, 28, "F")
         doc.setTextColor(255, 255, 255)
-        doc.setFontSize(14)
+        doc.setFontSize(11)
         doc.setFont("helvetica", "bold")
         doc.text("SUPERINTENDENCIA NACIONAL DE ADUANAS Y DE ADMINISTRACIÓN TRIBUTARIA", 14, 13)
-        doc.setFontSize(10)
+        doc.setFontSize(9.5)
         doc.setFont("helvetica", "normal")
         doc.text("SISTEMA INTEGRADO ERP SUNAT — REPORTE EXPORTADO DE GERENCIA", 14, 21)
 
