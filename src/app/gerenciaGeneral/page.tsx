@@ -9,6 +9,7 @@ import GrePanel from "./gre/GrePanel"
 import DeclaracionesPanel from "./declaraciones/DeclaracionesPanel"
 import HelpdeskPanel from "./helpdesk/HelpdeskPanel"
 import IncidenciasPanel from "./incidencias/IncidenciasPanel"
+import DashboardReportesPanel from "@/components/dashboard/DashboardReportesPanel"
 
 import { fetchWithAuth } from "@/utils/fetchWithAuth"
 
@@ -47,28 +48,7 @@ export default function GerenciaGeneral() {
     }
 
     // --- VISTA DASHBOARD ---
-    const renderDashboard = () => (
-        <div className="p-8 animate-fade-in">
-            <h2 className="text-2xl font-extrabold text-[#0063AE] mb-6">Dashboard de Reportes</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 shadow-sm rounded-lg border-t-4 border-[#0063AE] flex flex-col">
-                    <h3 className="text-gray-500 font-extrabold text-sm uppercase tracking-wider mb-2">Total Contribuyentes</h3>
-                    <p className="text-5xl font-extrabold text-black">{dashboardData.totalContribuyentes}</p>
-                    <p className="text-xs text-gray-400 mt-2">Registrados en el sistema</p>
-                </div>
-                <div className="bg-white p-6 shadow-sm rounded-lg border-t-4 border-[#0063AE] flex flex-col">
-                    <h3 className="text-gray-500 font-extrabold text-sm uppercase tracking-wider mb-2">GRE Emitidas</h3>
-                    <p className="text-5xl font-extrabold text-black">{dashboardData.totalGres}</p>
-                    <p className="text-xs text-gray-400 mt-2">Guías de remisión en la plataforma</p>
-                </div>
-                <div className="bg-white p-6 shadow-sm rounded-lg border-t-4 border-[#0063AE] flex flex-col">
-                    <h3 className="text-gray-500 font-extrabold text-sm uppercase tracking-wider mb-2">Declaraciones</h3>
-                    <p className="text-5xl font-extrabold text-black">{dashboardData.totalDeclaraciones}</p>
-                    <p className="text-xs text-gray-400 mt-2">Presentadas exitosamente</p>
-                </div>
-            </div>
-        </div>
-    )
+    const renderDashboard = () => <DashboardReportesPanel />
 
     return (
         <div className="flex h-screen w-full bg-gray-100 font-sans overflow-hidden">
