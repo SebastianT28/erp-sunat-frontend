@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +29,9 @@ public class IncidenciaService {
 
     @Autowired
     private JiraIntegrationService jiraIntegrationService;
+
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     // ---- REPORTES ----
 
@@ -70,6 +74,12 @@ public class IncidenciaService {
         if (jiraKey != null) {
             log.info("Incidencia {} vinculada al ticket Jira: {}", guardado.getCodigo(), jiraKey);
         }
+
+        // Registrar métrica personalizada para Prometheus/Grafana
+        meterRegistry.counter("incidencias.creadas.total",
+                "urgencia", guardado.getUrgencia(),
+                "area", guardado.getAreaAfectada()
+        ).increment();
 
         return toReporteDTO(guardado);
     }

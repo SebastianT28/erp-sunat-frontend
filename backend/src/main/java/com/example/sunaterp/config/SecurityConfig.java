@@ -18,6 +18,9 @@ public class SecurityConfig {
     @Autowired
     private com.example.sunaterp.security.JwtRequestFilter jwtRequestFilter;
 
+    @Autowired
+    private com.example.sunaterp.security.PrometheusAuthFilter prometheusAuthFilter;
+
     // Configura cómo Spring compara contraseñas
     // Usamos un encoder de texto plano ya que las contraseñas en la BD no están encriptadas aún
     @Bean
@@ -57,6 +60,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/helpdesk/tickets/status/**").permitAll() // Consulta de tickets
                 .requestMatchers("/api/helpdesk/faqs/active").permitAll()       // FAQs públicas para el chatbot
                 .requestMatchers("/api/helpdesk/quick-actions/active").permitAll() // Quick Actions para el chatbot
+                .requestMatchers("/actuator/prometheus").permitAll()     // Métricas (Protegido por PrometheusAuthFilter)
+                .requestMatchers("/actuator/health").permitAll()         // Health check (Público para Render)
                 // /api/soporte/incidencias/** requiere autenticación (cubierto por anyRequest)
                 .anyRequest().authenticated()                            // Todo lo demás protegido
             )
@@ -64,6 +69,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS));
 
         // 5. Añadir nuestro filtro JWT antes del filtro de validación de usuario y contraseña
+        http.addFilterBefore(prometheusAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtRequestFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
