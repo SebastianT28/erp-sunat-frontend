@@ -75,10 +75,10 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
-		<!-- Micrometer Prometheus Registry -->
+		<!-- Micrometer OTLP Registry (OpenTelemetry - Push a Grafana Cloud) -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-registry-prometheus</artifactId>
+			<artifactId>micrometer-registry-otlp</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
