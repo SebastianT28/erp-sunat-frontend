@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/helpdesk/faqs/active").permitAll()       // FAQs públicas para el chatbot
                 .requestMatchers("/api/helpdesk/quick-actions/active").permitAll() // Quick Actions para el chatbot
                 .requestMatchers("/actuator/health").permitAll()         // Health check (Público para Render)
+                .requestMatchers("/api/demo/**").permitAll()             // Endpoints de demo de eventos (sin JWT)
                 // /api/soporte/incidencias/** requiere autenticación (cubierto por anyRequest)
                 .anyRequest().authenticated()                            // Todo lo demás protegido
             )
