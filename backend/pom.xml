@@ -76,10 +76,10 @@
 		</dependency>
 
 		<!-- Micrometer OTLP Registry (OpenTelemetry - Push a Grafana Cloud) -->
+		<!-- Sin scope runtime para que esté disponible en tiempo de compilacion -->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-otlp</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
