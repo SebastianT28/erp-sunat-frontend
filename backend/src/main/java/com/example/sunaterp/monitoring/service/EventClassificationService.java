@@ -35,7 +35,8 @@ public class EventClassificationService {
         log.info("[EVENTO][INFO][{}] {}", area, mensaje);
         meterRegistry.counter("eventos.clasificados.total",
                 "nivel", "INFO",
-                "area", area
+                "area", area,
+                "evento", mensaje
         ).increment();
     }
 
@@ -47,7 +48,8 @@ public class EventClassificationService {
         log.warn("[EVENTO][WARNING][{}] {} | Requiere revisión.", area, mensaje);
         meterRegistry.counter("eventos.clasificados.total",
                 "nivel", "WARNING",
-                "area", area
+                "area", area,
+                "evento", mensaje
         ).increment();
     }
 
@@ -59,7 +61,8 @@ public class EventClassificationService {
         log.error("[EVENTO][ERROR][{}] {} | Acción correctiva recomendada.", area, mensaje);
         meterRegistry.counter("eventos.clasificados.total",
                 "nivel", "ERROR",
-                "area", area
+                "area", area,
+                "evento", mensaje
         ).increment();
     }
 
@@ -71,7 +74,8 @@ public class EventClassificationService {
         log.error("[EVENTO][CRITICAL][{}] *** ALERTA CRÍTICA *** {} | Intervención INMEDIATA requerida.", area, mensaje);
         meterRegistry.counter("eventos.clasificados.total",
                 "nivel", "CRITICAL",
-                "area", area
+                "area", area,
+                "evento", mensaje
         ).increment();
     }
 }

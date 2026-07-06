@@ -49,6 +49,12 @@ public class OtlpMetricsConfig {
             }
 
             @Override
+            public Map<String, String> resourceAttributes() {
+                // Esto elimina la etiqueta "unknown_service" en Grafana
+                return Map.of("service.name", "erp-sunat");
+            }
+
+            @Override
             public String get(String key) {
                 return null; // Usar valores por defecto para el resto
             }
