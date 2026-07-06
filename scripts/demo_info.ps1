@@ -1,6 +1,6 @@
 # =============================================================
-# demo_info.ps1 - Dispara eventos de tipo INFORMACIÓN
-# Simula operaciones normales y exitosas en todas las áreas
+# demo_info.ps1 - Dispara eventos de tipo INFORMACION
+# Simula operaciones normales y exitosas en todas las areas
 # Uso: .\demo_info.ps1
 # =============================================================
 
@@ -9,17 +9,17 @@ $areas = @("AUTH", "BASE_DATOS", "MEMORIA", "DISCO", "RED", "INCIDENCIAS", "SERV
 
 Write-Host ""
 Write-Host "=============================================================" -ForegroundColor Cyan
-Write-Host "  ERP-SUNAT | Demo Eventos: INFORMACIÓN" -ForegroundColor Cyan
+Write-Host "  ERP-SUNAT | Demo Eventos: INFORMACION" -ForegroundColor Cyan
 Write-Host "  Simula operaciones normales exitosas del sistema" -ForegroundColor Cyan
 Write-Host "=============================================================" -ForegroundColor Cyan
 Write-Host ""
 
 foreach ($area in $areas) {
-    Write-Host "  [INFO] Disparando evento en área: $area ..." -ForegroundColor White -NoNewline
+    Write-Host "  [INFO] Disparando evento en area: $area ..." -ForegroundColor White -NoNewline
     try {
         $response = Invoke-RestMethod -Uri "$BASE_URL/info?area=$area" -Method Post -ContentType "application/json"
         Write-Host " OK" -ForegroundColor Green
-        Write-Host "         Métrica: $($response.grafana_metric)" -ForegroundColor DarkGray
+        Write-Host "         Metrica: $($response.grafana_metric)" -ForegroundColor DarkGray
     } catch {
         Write-Host " ERROR: $($_.Exception.Message)" -ForegroundColor Red
     }

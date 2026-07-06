@@ -1,6 +1,6 @@
 # =============================================================
 # demo_warning.ps1 - Dispara eventos de tipo WARNING
-# Simula situaciones degradadas que requieren revisión
+# Simula situaciones degradadas que requieren revision
 # Uso: .\demo_warning.ps1
 # =============================================================
 
@@ -10,16 +10,16 @@ $areas = @("AUTH", "BASE_DATOS", "MEMORIA", "DISCO", "RED", "INCIDENCIAS", "SERV
 Write-Host ""
 Write-Host "=============================================================" -ForegroundColor Yellow
 Write-Host "  ERP-SUNAT | Demo Eventos: WARNING" -ForegroundColor Yellow
-Write-Host "  Simula situaciones degradadas que requieren revisión" -ForegroundColor Yellow
+Write-Host "  Simula situaciones degradadas que requieren revision" -ForegroundColor Yellow
 Write-Host "=============================================================" -ForegroundColor Yellow
 Write-Host ""
 
 foreach ($area in $areas) {
-    Write-Host "  [WARN] Disparando evento en área: $area ..." -ForegroundColor Yellow -NoNewline
+    Write-Host "  [WARN] Disparando evento en area: $area ..." -ForegroundColor Yellow -NoNewline
     try {
         $response = Invoke-RestMethod -Uri "$BASE_URL/warning?area=$area" -Method Post -ContentType "application/json"
         Write-Host " OK" -ForegroundColor Green
-        Write-Host "         Métrica: $($response.grafana_metric)" -ForegroundColor DarkGray
+        Write-Host "         Metrica: $($response.grafana_metric)" -ForegroundColor DarkGray
     } catch {
         Write-Host " ERROR: $($_.Exception.Message)" -ForegroundColor Red
     }
