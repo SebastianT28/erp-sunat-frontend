@@ -22,9 +22,11 @@ public class EventClassificationService {
     private static final Logger log = LoggerFactory.getLogger(EventClassificationService.class);
 
     private final MeterRegistry meterRegistry;
+    private final AlertHistoryService alertHistoryService;
 
-    public EventClassificationService(MeterRegistry meterRegistry) {
+    public EventClassificationService(MeterRegistry meterRegistry, AlertHistoryService alertHistoryService) {
         this.meterRegistry = meterRegistry;
+        this.alertHistoryService = alertHistoryService;
     }
 
     /**
@@ -51,6 +53,7 @@ public class EventClassificationService {
                 "area", area,
                 "evento", mensaje
         ).increment();
+        alertHistoryService.addAlert("WARNING", area, mensaje);
     }
 
     /**
@@ -64,6 +67,7 @@ public class EventClassificationService {
                 "area", area,
                 "evento", mensaje
         ).increment();
+        alertHistoryService.addAlert("ERROR", area, mensaje);
     }
 
     /**
@@ -77,5 +81,6 @@ public class EventClassificationService {
                 "area", area,
                 "evento", mensaje
         ).increment();
+        alertHistoryService.addAlert("CRITICAL", area, mensaje);
     }
 }

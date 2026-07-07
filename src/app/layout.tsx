@@ -21,7 +21,10 @@ export const metadata: Metadata = {
   description: "Sistema Web de Servicios Administrativos y Contables",
 };
 
+import { Toaster } from "sonner";
+
 const HelpDeskWidget = dynamic(() => import('@/components/HelpDeskWidget/HelpDeskWidget'));
+const AdminAlertListener = dynamic(() => import('@/components/AdminAlertListener/AdminAlertListener'), { ssr: false });
 
 export default function RootLayout({
   children,
@@ -36,6 +39,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <HelpDeskWidget />
+        <Toaster richColors position="top-right" />
+        <AdminAlertListener />
       </body>
     </html>
   );
