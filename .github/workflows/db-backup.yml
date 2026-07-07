@@ -32,8 +32,8 @@ jobs:
           PGUSER: ${{ secrets.DB_USER }}
           PGPASSWORD: ${{ secrets.DB_PASSWORD }}
           PGDATABASE: ${{ secrets.DB_NAME }}
-          # Las URLs de Supabase suelen requerir el puerto 5432 o 6543
-          PGPORT: 5432
+          # Usamos el puerto 6543 (Connection Pooler) porque GitHub Actions tiene problemas con IPv6 (Direct Connection)
+          PGPORT: 6543
         run: |
           echo "Iniciando respaldo de la base de datos..."
           # Utilizamos pg_dump en formato custom (-Fc) que es el más flexible para restaurar, 
