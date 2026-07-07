@@ -22,9 +22,9 @@ export const metadata: Metadata = {
 };
 
 import { Toaster } from "sonner";
+import AdminAlertListener from "@/components/AdminAlertListener/AdminAlertListener";
 
 const HelpDeskWidget = dynamic(() => import('@/components/HelpDeskWidget/HelpDeskWidget'));
-const AdminAlertListener = dynamic(() => import('@/components/AdminAlertListener/AdminAlertListener'), { ssr: false });
 
 export default function RootLayout({
   children,
