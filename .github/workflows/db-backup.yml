@@ -52,3 +52,40 @@ jobs:
           path: backup_erp_sunat_${{ steps.timestamp.outputs.date }}.dump
           # GitHub Artifacts guarda los archivos por 90 días por defecto
           retention-days: 30
+
+      - name: Instalar rclone
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+
+      - name: Configurar rclone con Service Account de Google
+        env:
+          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          mkdir -p ~/.config/rclone
+          # Escribir el JSON de la service account en un archivo temporal seguro
+          echo "${GDRIVE_SERVICE_ACCOUNT_JSON}" > /tmp/gdrive-sa.json
+          # Crear la configuración de rclone apuntando a la carpeta raíz del Drive
+          cat > ~/.config/rclone/rclone.conf << EOF
+          [gdrive]
+          type = drive
+          scope = drive
+          service_account_file = /tmp/gdrive-sa.json
+          root_folder_id = ${GDRIVE_FOLDER_ID}
+          EOF
+
+      - name: Subir Backup a Google Drive
+        run: |
+          # Organizar en subcarpeta por mes (ej: 2026-07)
+          MONTH_FOLDER=$(date +'%Y-%m')
+          BACKUP_FILE="backup_erp_sunat_${{ steps.timestamp.outputs.date }}.dump"
+          echo "📤 Subiendo ${BACKUP_FILE} a Google Drive en carpeta: ${MONTH_FOLDER}/"
+          rclone copy "${BACKUP_FILE}" "gdrive:${MONTH_FOLDER}/" --verbose
+          echo "✅ Backup subido exitosamente a Google Drive."
+          echo "📁 Ubicación: ERP-SUNAT-Backups/${MONTH_FOLDER}/${BACKUP_FILE}"
+
+      - name: Limpiar credenciales temporales
+        if: always()
+        run: |
+          rm -f /tmp/gdrive-sa.json
+          echo "🔒 Credenciales temporales eliminadas."
