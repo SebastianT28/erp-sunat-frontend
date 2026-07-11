@@ -57,20 +57,19 @@ jobs:
         run: |
           curl https://rclone.org/install.sh | sudo bash
 
-      - name: Configurar rclone con Service Account de Google
+      - name: Configurar rclone con OAuth2 (token personal de Google)
         env:
-          GDRIVE_SERVICE_ACCOUNT_JSON: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
+          GDRIVE_TOKEN: ${{ secrets.GDRIVE_TOKEN }}
           GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
         run: |
           mkdir -p ~/.config/rclone
-          # Escribir el JSON de la service account en un archivo temporal seguro
-          echo "${GDRIVE_SERVICE_ACCOUNT_JSON}" > /tmp/gdrive-sa.json
-          # Crear la configuración de rclone apuntando a la carpeta raíz del Drive
+          # Usar OAuth2 token personal: los archivos quedan en el Drive del usuario
+          # y consumen su quota personal (15 GB de Gmail), no la de la service account
           cat > ~/.config/rclone/rclone.conf << EOF
           [gdrive]
           type = drive
           scope = drive
-          service_account_file = /tmp/gdrive-sa.json
+          token = ${GDRIVE_TOKEN}
           root_folder_id = ${GDRIVE_FOLDER_ID}
           EOF
 
@@ -84,8 +83,8 @@ jobs:
           echo "✅ Backup subido exitosamente a Google Drive."
           echo "📁 Ubicación: ERP-SUNAT-Backups/${MONTH_FOLDER}/${BACKUP_FILE}"
 
-      - name: Limpiar credenciales temporales
+      - name: Limpiar configuración temporal de rclone
         if: always()
         run: |
-          rm -f /tmp/gdrive-sa.json
-          echo "🔒 Credenciales temporales eliminadas."
+          rm -f ~/.config/rclone/rclone.conf
+          echo "🔒 Configuración temporal de rclone eliminada."
