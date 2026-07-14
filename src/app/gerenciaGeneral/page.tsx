@@ -9,6 +9,7 @@ import GrePanel from "./gre/GrePanel"
 import DeclaracionesPanel from "./declaraciones/DeclaracionesPanel"
 import HelpdeskPanel from "./helpdesk/HelpdeskPanel"
 import IncidenciasPanel from "./incidencias/IncidenciasPanel"
+import DrpPanel from "./drp/DrpPanel"
 import DashboardReportesPanel from "@/components/dashboard/DashboardReportesPanel"
 
 import { fetchWithAuth } from "@/utils/fetchWithAuth"
@@ -125,6 +126,18 @@ export default function GerenciaGeneral() {
                             </svg>
                             Gestión de Incidencias
                         </button>
+
+                        <button 
+                            onClick={() => setActiveTab('drp')} 
+                            className={`px-6 py-4 text-left font-extrabold text-sm transition-all flex items-center gap-3
+                                ${activeTab === 'drp' ? 'bg-[#004d8a] border-l-4 border-white' : 'hover:bg-[#00569e] border-l-4 border-transparent text-blue-100'}
+                            `}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                                <path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            Continuidad DRP (Failback)
+                        </button>
                     </nav>
                 </div>
 
@@ -160,6 +173,7 @@ export default function GerenciaGeneral() {
                 {activeTab === 'declaraciones' && <DeclaracionesPanel />}
                 {activeTab === 'helpdesk' && <HelpdeskPanel />}
                 {activeTab === 'incidencias' && <IncidenciasPanel />}
+                {activeTab === 'drp' && <DrpPanel />}
             </div>
             
             <style jsx global>{`
