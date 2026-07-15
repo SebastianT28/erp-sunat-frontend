@@ -67,7 +67,7 @@ export default function Seccion1({ formData, updateFormData, nextStep }: Props) 
         </div>
       </div>
 
-      {/* Columna Derecha: Formulario */}
+      {/* Columna Derecha: Formulario principal*/}
       <div>
         <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Valida tu Identidad</h2>
         <p className="text-gray-500 mb-5 text-sm">Ingresa tus datos principales para iniciar el proceso de alta en la plataforma.</p>
