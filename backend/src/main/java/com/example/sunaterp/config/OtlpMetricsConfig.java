@@ -21,10 +21,10 @@ public class OtlpMetricsConfig {
 
     private static final Logger log = LoggerFactory.getLogger(OtlpMetricsConfig.class);
 
-    @Value("${GRAFANA_OTLP_URL}")
+    @Value("${GRAFANA_OTLP_URL:http://localhost:4318/otlp/v1/metrics}")
     private String otlpUrl;
 
-    @Value("${GRAFANA_OTLP_TOKEN}")
+    @Value("${GRAFANA_OTLP_TOKEN:demo-token-disabled}")
     private String otlpToken;
 
     @Bean
