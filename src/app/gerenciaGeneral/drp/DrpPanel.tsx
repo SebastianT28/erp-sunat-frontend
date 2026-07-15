@@ -24,7 +24,7 @@ type FailbackResponse = {
   detalleSecuencias: DetalleSecuencia[];
   timestamp: string;
 };
-
+//Modulo de failback implementado
 export default function DrpPanel() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [result, setResult] = useState<FailbackResponse | null>(null);
@@ -167,7 +167,7 @@ export default function DrpPanel() {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 print:hidden">
         <div>
           <h2 className="text-2xl font-extrabold text-[#0063AE] flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
             Continuidad DRP e Ingeniería del Caos (Failback)
           </h2>
           <p className="text-xs text-gray-500 font-bold mt-1 uppercase tracking-wider">
@@ -190,7 +190,7 @@ export default function DrpPanel() {
               </>
             ) : (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v-5" /></svg>
                 Ejecutar Failback Automático (Catch-up)
               </>
             )}
@@ -204,7 +204,7 @@ export default function DrpPanel() {
           <div className="flex items-center justify-between">
             <h3 className="text-gray-500 font-extrabold text-xs uppercase tracking-wider">Topología de Servidores</h3>
             <span className="p-2 bg-blue-50 text-[#0063AE] rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></svg>
             </span>
           </div>
           <p className="text-2xl font-black text-gray-800 mt-2">Multi-Host Activo</p>
@@ -215,7 +215,7 @@ export default function DrpPanel() {
           <div className="flex items-center justify-between">
             <h3 className="text-gray-500 font-extrabold text-xs uppercase tracking-wider">Tolerancia de Conmutación</h3>
             <span className="p-2 bg-green-50 text-green-600 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
             </span>
           </div>
           <p className="text-2xl font-black text-gray-800 mt-2">Conmutación Rápida</p>
@@ -226,7 +226,7 @@ export default function DrpPanel() {
           <div className="flex items-center justify-between">
             <h3 className="text-gray-500 font-extrabold text-xs uppercase tracking-wider">Alcance del Failback</h3>
             <span className="p-2 bg-orange-50 text-orange-600 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m4.93 4.93 4.24 4.24" /><path d="m14.83 9.17 4.24-4.24" /><path d="m14.83 14.83 4.24 4.24" /><path d="m9.17 14.83-4.24 4.24" /></svg>
             </span>
           </div>
           <p className="text-2xl font-black text-gray-800 mt-2">100% (24 Tablas)</p>
@@ -237,7 +237,7 @@ export default function DrpPanel() {
       {/* Banner explicativo de gestión y continuidad DRP para Administradores */}
       <div className="bg-gradient-to-r from-[#0063AE] to-[#003865] p-6 rounded-2xl text-white shadow-md mb-6 print:hidden">
         <h3 className="text-lg font-black flex items-center gap-2 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           Gestión de Continuidad de Negocio: Protocolo de Retorno a Base Principal (Failback DRP)
         </h3>
         <p className="text-sm text-blue-100 leading-relaxed max-w-4xl font-medium">
@@ -248,7 +248,7 @@ export default function DrpPanel() {
       {/* Mensaje de Error si ocurre */}
       {errorMsg && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl text-sm font-bold flex items-center gap-3 mb-6 animate-scale-in">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-red-500"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-red-500"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
           <div>
             <p className="font-extrabold text-base">Atención: No se pudo completar la sincronización</p>
             <p className="text-xs text-red-600 font-medium mt-0.5">{errorMsg}</p>
@@ -273,7 +273,7 @@ export default function DrpPanel() {
               onClick={handleDescargarPDF}
               className="bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-2 cursor-pointer shadow"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
               Descargar PDF Oficial
             </button>
           </div>
@@ -301,7 +301,7 @@ export default function DrpPanel() {
             {result.filasMigradasDetalle && result.filasMigradasDetalle.length > 0 && (
               <div className="mb-6 bg-blue-50/70 border border-blue-200 rounded-xl p-4">
                 <h4 className="text-xs font-extrabold text-[#0063AE] uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
                   Registros Diferenciales Migrados con Éxito a Base Principal:
                 </h4>
                 <ul className="list-disc list-inside text-xs font-bold text-gray-800 space-y-1">
@@ -313,7 +313,7 @@ export default function DrpPanel() {
             )}
 
             <h4 className="text-sm font-extrabold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#0063AE]"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#0063AE]"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
               Auditoría Detallada de las Secuencias del Sistema
             </h4>
 
@@ -354,7 +354,7 @@ export default function DrpPanel() {
       {!result && !isSyncing && (
         <div className="bg-white rounded-2xl p-12 border border-gray-100 shadow-sm text-center my-auto flex flex-col items-center justify-center max-w-xl mx-auto">
           <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-[#0063AE] mb-4 shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v-5"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v-5" /></svg>
           </div>
           <h3 className="text-lg font-black text-gray-800">Sincronización en Espera</h3>
           <p className="text-xs text-gray-500 font-medium mt-1 max-w-md leading-relaxed">
